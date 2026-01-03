@@ -1,0 +1,321 @@
+import React, { useState, useEffect } from 'react';
+import Layout from '../components/Layout';
+import axios from 'axios';
+import { User, Briefcase, DollarSign, FileText, Edit, Camera, Phone, MapPin, Mail } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+
+const Profile = () => {
+    const { user: authUser } = useAuth();
+    const [profile, setProfile] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState('overview');
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [formData, setFormData] = useState({
+        firstName: '', lastName: '', dob: '', gender: '', phone: '', address: '', profilePicture: ''
+    });
+
+    const token = localStorage.getItem('token');
+
+    useEffect(() => {
+        fetchProfile();
+    }, []);
+
+    const fetchProfile = async () => {
+        try {
+            const config = { headers: { Authorization: `Bearer ${token}` } };
+            const { data } = await axios.get('http://localhost:5000/api/users/profile', config);
+            setProfile(data);
+            setFormData({
+                firstName: data.firstName || '',
+                lastName: data.lastName || '',
+                dob: data.dob || '',
+                gender: data.gender || '',
+                phone: data.phone || '',
+                address: data.address || '',
+                profilePicture: data.profilePicture || ''
+            });
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleUpdate = async (e) => {
+        e.preventDefault();
+        try {
+            const config = { headers: { Authorization: `Bearer ${token}` } };
+            await axios.put('http://localhost:5000/api/users/profile', formData, config);
+            setShowEditModal(false);
+            fetchProfile();
+            alert('Profile updated successfully');
+        } catch (error) {
+            alert('Failed to update profile');
+        }
+    };
+
+    if (loading) return <Layout><div className="flex justify-center p-10">Loading...</div></Layout>;
+
+    return (
+        <Layout>
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">My Profile</h1>
+                <button 
+                    onClick={() => setShowEditModal(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                    <Edit className="w-4 h-4" />
+                    Edit Profile
+                </button>
+            </div>
+
+            {/* Header Card */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 mb-6 flex flex-col md:flex-row items-center gap-6">
+                <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden border-4 border-white dark:border-gray-700 shadow-lg">
+                    {profile.profilePicture ? (
+                        <img src={profile.profilePicture} alt="Profile" className="w-full h-full object-cover" />
+                    ) : (
+                        <User className="w-12 h-12 text-gray-400" />
+                    )}
+                </div>
+                <div className="text-center md:text-left flex-1">
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{profile.firstName} {profile.lastName}</h2>
+                    <p className="text-gray-500 dark:text-gray-400 font-medium">{profile.designation || 'Employee'} • {profile.department || 'General'}</p>
+                    <div className="flex flex-wrap justify-center md:justify-start gap-4 mt-3 text-sm text-gray-600 dark:text-gray-300">
+                        <div className="flex items-center gap-1"><Mail className="w-4 h-4" /> {profile.email}</div>
+                        <div className="flex items-center gap-1"><Phone className="w-4 h-4" /> {profile.phone || 'N/A'}</div>
+                        <div className="flex items-center gap-1"><MapPin className="w-4 h-4" /> {profile.address || 'N/A'}</div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Navigation Tabs */}
+            <div className="flex border-b border-gray-200 dark:border-gray-700 mb-6">
+                <button 
+                    onClick={() => setActiveTab('overview')}
+                    className={`px-6 py-3 font-medium text-sm transition-colors border-b-2 ${activeTab === 'overview' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}
+                >
+                    Overview
+                </button>
+                <button 
+                    onClick={() => setActiveTab('salary')}
+                    className={`px-6 py-3 font-medium text-sm transition-colors border-b-2 ${activeTab === 'salary' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}
+                >
+                    Salary Structure
+                </button>
+                 <button 
+                    onClick={() => setActiveTab('documents')}
+                    className={`px-6 py-3 font-medium text-sm transition-colors border-b-2 ${activeTab === 'documents' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}
+                >
+                    Documents
+                </button>
+            </div>
+
+            {/* Content Area */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 min-h-[300px]">
+                {activeTab === 'overview' && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2"><User className="w-5 h-5 text-blue-500"/> Personal Details</h3>
+                            <div className="space-y-3">
+                                <div className="grid grid-cols-3 text-sm"><span className="text-gray-500">Full Name</span> <span className="col-span-2 text-gray-900 dark:text-white font-medium">{profile.firstName} {profile.lastName}</span></div>
+                                <div className="grid grid-cols-3 text-sm"><span className="text-gray-500">Date of Birth</span> <span className="col-span-2 text-gray-900 dark:text-white font-medium">{profile.dob ? new Date(profile.dob).toLocaleDateString() : '-'}</span></div>
+                                <div className="grid grid-cols-3 text-sm"><span className="text-gray-500">Gender</span> <span className="col-span-2 text-gray-900 dark:text-white font-medium">{profile.gender || '-'}</span></div>
+                                <div className="grid grid-cols-3 text-sm"><span className="text-gray-500">Address</span> <span className="col-span-2 text-gray-900 dark:text-white font-medium">{profile.address || '-'}</span></div>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2"><Briefcase className="w-5 h-5 text-blue-500"/> Job Details</h3>
+                             <div className="space-y-3">
+                                <div className="grid grid-cols-3 text-sm"><span className="text-gray-500">Employee ID</span> <span className="col-span-2 text-gray-900 dark:text-white font-medium">{profile.employeeId}</span></div>
+                                <div className="grid grid-cols-3 text-sm"><span className="text-gray-500">Department</span> <span className="col-span-2 text-gray-900 dark:text-white font-medium">{profile.department}</span></div>
+                                <div className="grid grid-cols-3 text-sm"><span className="text-gray-500">Designation</span> <span className="col-span-2 text-gray-900 dark:text-white font-medium">{profile.designation}</span></div>
+                                <div className="grid grid-cols-3 text-sm"><span className="text-gray-500">Joining Date</span> <span className="col-span-2 text-gray-900 dark:text-white font-medium">{new Date(profile.joinedDate).toLocaleDateString()}</span></div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {activeTab === 'salary' && (
+                    <div>
+                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2"><DollarSign className="w-5 h-5 text-green-500"/> Salary Details</h3>
+                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                             <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                                 <p className="text-sm text-gray-500">Basic Salary</p>
+                                 <p className="text-xl font-bold text-gray-900 dark:text-white">${profile.salaryStructure?.basic || 0}</p>
+                             </div>
+                             <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                                 <p className="text-sm text-gray-500">HRA</p>
+                                 <p className="text-xl font-bold text-gray-900 dark:text-white">${profile.salaryStructure?.hra || 0}</p>
+                             </div>
+                             <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                                 <p className="text-sm text-gray-500">Other Allowances</p>
+                                 <p className="text-xl font-bold text-gray-900 dark:text-white">${profile.salaryStructure?.allowances || 0}</p>
+                             </div>
+                             <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-100 dark:border-green-900/30">
+                                 <p className="text-sm text-green-600 dark:text-green-400">Gross Salary</p>
+                                 <p className="text-xl font-bold text-green-700 dark:text-green-400">
+                                     ${(profile.salaryStructure?.basic || 0) + (profile.salaryStructure?.hra || 0) + (profile.salaryStructure?.allowances || 0)}
+                                 </p>
+                             </div>
+                         </div>
+                    </div>
+                )}
+
+                 {activeTab === 'documents' && (
+                    <div>
+                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2"><FileText className="w-5 h-5 text-orange-500"/> Documents</h3>
+                         {profile.documents && profile.documents.length > 0 ? (
+                             <ul className="space-y-2">
+                                 {profile.documents.map((doc, index) => (
+                                     <li key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                         <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{doc.name}</span>
+                                         <a href={doc.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-sm">View</a>
+                                     </li>
+                                 ))}
+                             </ul>
+                         ) : (
+                             <div className="text-center py-10 text-gray-500">
+                                 <FileText className="w-12 h-12 mx-auto mb-2 opacity-20" />
+                                 <p>No documents uploaded.</p>
+                             </div>
+                         )}
+                    </div>
+                )}
+            </div>
+
+            {/* Edit Modal */}
+            {showEditModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-2xl p-6 overflow-y-auto max-h-[90vh]">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Edit Profile</h3>
+                        <form onSubmit={handleUpdate} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                             <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">First Name</label>
+                                <input 
+                                    type="text" 
+                                    className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                    value={formData.firstName}
+                                    onChange={(e) => setFormData({...formData, firstName: e.target.value})}
+                                />
+                            </div>
+                             <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Last Name</label>
+                                <input 
+                                    type="text" 
+                                    className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                    value={formData.lastName}
+                                    onChange={(e) => setFormData({...formData, lastName: e.target.value})}
+                                />
+                            </div>
+                             <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date of Birth</label>
+                                <input 
+                                    type="date" 
+                                    className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                    value={formData.dob ? formData.dob.split('T')[0] : ''}
+                                    onChange={(e) => setFormData({...formData, dob: e.target.value})}
+                                />
+                            </div>
+                             <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Gender</label>
+                                <select 
+                                    className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                    value={formData.gender}
+                                    onChange={(e) => setFormData({...formData, gender: e.target.value})}
+                                >
+                                    <option value="">Select Gender</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+
+                             <div className="md:col-span-2">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phone Number</label>
+                                <input 
+                                    type="text" 
+                                    className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                    value={formData.phone}
+                                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                                />
+                            </div>
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Address</label>
+                                <textarea 
+                                    className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                    rows="2"
+                                    value={formData.address}
+                                    onChange={(e) => setFormData({...formData, address: e.target.value})}
+                                />
+                            </div>
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Profile Picture</label>
+                                <div className="flex items-center gap-4">
+                                    <div className="relative">
+                                        <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-100 border border-gray-200">
+                                            {formData.profilePicture ? (
+                                                <img src={formData.profilePicture} alt="Preview" className="w-full h-full object-cover" />
+                                            ) : (
+                                                <User className="w-full h-full text-gray-400 p-2" />
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div className="flex-1">
+                                        <input
+                                            type="text"
+                                            placeholder="Enter Image URL"
+                                            className="w-full px-3 py-2 mb-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                            value={formData.profilePicture}
+                                            onChange={(e) => setFormData({ ...formData, profilePicture: e.target.value })}
+                                        />
+                                        <div className="flex items-center gap-2">
+                                            <label className="cursor-pointer px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg text-sm font-medium transition-colors">
+                                                <span>Upload File</span>
+                                                <input 
+                                                    type="file" 
+                                                    className="hidden" 
+                                                    onChange={async (e) => {
+                                                        const file = e.target.files[0];
+                                                        if (!file) return;
+                                                        
+                                                        const uploadData = new FormData();
+                                                        uploadData.append('image', file);
+
+                                                        try {
+                                                            const config = {
+                                                                headers: {
+                                                                    'Content-Type': 'multipart/form-data',
+                                                                },
+                                                            };
+                                                            // Note: Hardcoded localhost for now, ideally use env
+                                                            const { data } = await axios.post('http://localhost:5000/api/upload', uploadData, config);
+                                                            // Prepend server URL to path
+                                                            const fullUrl = `http://localhost:5000${data}`;
+                                                            setFormData(prev => ({ ...prev, profilePicture: fullUrl }));
+                                                        } catch (error) {
+                                                            console.error(error);
+                                                            alert('Image upload failed');
+                                                        }
+                                                    }}
+                                                />
+                                            </label>
+                                            <span className="text-xs text-gray-500">JPG, PNG only</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div className="md:col-span-2 flex justify-end gap-3 mt-4">
+                                <button type="button" onClick={() => setShowEditModal(false)} className="px-4 py-2 bg-gray-100 rounded-lg dark:bg-gray-700">Cancel</button>
+                                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+        </Layout>
+    );
+};
+
+export default Profile;
