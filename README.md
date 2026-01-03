@@ -51,7 +51,7 @@ Dayflow is a comprehensive Human Resource Management System (HRMS) designed for 
     # MONGO_URI=mongodb://localhost:27017/dayflow
     # JWT_SECRET=your_secret_key
     
-    # Seed Database (Admin: admin@dayflow.com / adminpassword)
+    # Seed Database (Admin: admin@dayflow.com / admin123)
     npm run seed
     
     # Start Server
