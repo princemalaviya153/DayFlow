@@ -84,7 +84,7 @@ const AddEmployeeModal = ({ isOpen, onClose, onAdd, initialData = null }) => {
                         <input name="firstName" placeholder="First Name" value={formData.firstName} onChange={handleChange} required className="input-field" />
                         <input name="lastName" placeholder="Last Name" value={formData.lastName} onChange={handleChange} required className="input-field" />
                         <input name="email" type="email" placeholder="Email" value={formData.email} onChange={handleChange} required className="input-field" />
-                        <input name="employeeId" placeholder="Employee ID" value={formData.employeeId} onChange={handleChange} required className="input-field" disabled={!!initialData} />
+                        <input name="employeeId" placeholder="Employee ID (e.g. EMP001)" value={formData.employeeId} onChange={handleChange} required className="input-field" disabled={!!initialData} />
                     </div>
 
                     {!initialData && (
