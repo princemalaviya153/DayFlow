@@ -7,6 +7,7 @@ Dayflow is a comprehensive Human Resource Management System (HRMS) designed for 
 ### Authentication & Authorization
 - **Role-Based Access**: Admin and Employee roles with distinct dashboards.
 - **Secure Auth**: JWT-based authentication with bcrypt password hashing.
+- **Password Recovery**: Secure "Forgot Password" flow with email reset links.
 
 ### Admin Features
 - **Dashboard**: Overview of total employees, attendance stats, and quick actions.
@@ -18,7 +19,7 @@ Dayflow is a comprehensive Human Resource Management System (HRMS) designed for 
 ### Employee Features
 - **Dashboard**: Personal stats, daily check-in status, and quick links.
 - **Attendance**: Check-in/Check-out with one click. View personal history.
-- **Leave**: Apply for leave (Sick, Paid, Unpaid) and track status.
+- **Leave**: Apply for leave (Sick, Paid, Unpaid) with date validation and conflict checking.
 - **Payslips**: View and download monthly salary slips.
 
 ## Tech Stack
@@ -50,6 +51,10 @@ Dayflow is a comprehensive Human Resource Management System (HRMS) designed for 
     # PORT=5000
     # MONGO_URI=mongodb://localhost:27017/dayflow
     # JWT_SECRET=your_secret_key
+    # EMAIL_HOST=smtp.gmail.com (Optional for Forgot Password)
+    # EMAIL_PORT=587
+    # EMAIL_USER=your_email@gmail.com
+    # EMAIL_PASS=your_app_password
     
     # Seed Database (Admin: admin@dayflow.com / admin123)
     npm run seed
