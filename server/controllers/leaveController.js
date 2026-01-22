@@ -6,6 +6,38 @@ const Leave = require('../models/Leave');
 const applyLeave = async (req, res) => {
     try {
         const { leaveType, startDate, endDate, reason } = req.body;
+
+        // 1. Validate Dates
+        if (new Date(startDate) > new Date(endDate)) {
+            return res.status(400).json({ message: 'End date cannot be before start date' });
+        }
+
+        // 2. Check for Overlapping Leaves
+        const existingLeave = await Leave.findOne({
+            user: req.user.id,
+            $or: [
+                {
+                    // Case 1: New start date falls within an existing leave
+                    startDate: { $lte: new Date(startDate) },
+                    endDate: { $gte: new Date(startDate) }
+                },
+                {
+                    // Case 2: New end date falls within an existing leave
+                    startDate: { $lte: new Date(endDate) },
+                    endDate: { $gte: new Date(endDate) }
+                },
+                {
+                    // Case 3: New leave completely encompasses an existing leave
+                    startDate: { $gte: new Date(startDate) },
+                    endDate: { $lte: new Date(endDate) }
+                }
+            ],
+            status: { $ne: 'Rejected' } // Ignore rejected leaves
+        });
+
+        if (existingLeave) {
+            return res.status(400).json({ message: 'You already have a pending or approved leave for this period' });
+        }
         
         const leave = await Leave.create({
             user: req.user.id,

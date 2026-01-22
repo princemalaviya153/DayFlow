@@ -78,10 +78,19 @@ const Login = () => {
                         </div>
                     </div>
 
+                    <div className="flex items-center justify-between mb-4">
+                         <label className="flex items-center text-sm text-gray-600">
+                           {/* Remember me checkbox could go here */}
+                        </label>
+                        <Link to="/forgot-password" className="text-sm text-teal-600 hover:text-teal-500">
+                            Forgot your password?
+                        </Link>
+                    </div>
+
                     <button
                         type="submit"
                         disabled={isLoading}
-                        className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                        className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
                     >
                         {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Sign In'}
                     </button>
