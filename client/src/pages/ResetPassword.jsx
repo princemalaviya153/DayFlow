@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { Lock, Loader2 } from 'lucide-react';
 
@@ -25,7 +25,7 @@ const ResetPassword = () => {
 
         setIsLoading(true);
         try {
-            await axios.put(`http://localhost:5000/api/auth/reset-password/${token}`, { password });
+            await api.put(`/auth/reset-password/${token}`, { password });
             setMessage('Password reset successful! Redirecting to login...');
             setTimeout(() => {
                 navigate('/login');

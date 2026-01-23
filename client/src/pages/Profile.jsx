@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import axios from 'axios';
-import { User, Briefcase, DollarSign, FileText, Edit, Camera, Phone, MapPin, Mail } from 'lucide-react';
+import api from '../utils/api';
+import { User, Mail, Phone, MapPin, Briefcase, Calendar, Camera, Upload, Edit, FileText, DollarSign } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const Profile = () => {
@@ -23,7 +24,7 @@ const Profile = () => {
     const fetchProfile = async () => {
         try {
             const config = { headers: { Authorization: `Bearer ${token}` } };
-            const { data } = await axios.get('http://localhost:5000/api/users/profile', config);
+            const { data } = await api.get('/users/profile', config);
             setProfile(data);
             setFormData({
                 firstName: data.firstName || '',
@@ -45,7 +46,7 @@ const Profile = () => {
         e.preventDefault();
         try {
             const config = { headers: { Authorization: `Bearer ${token}` } };
-            await axios.put('http://localhost:5000/api/users/profile', formData, config);
+            await api.put('/users/profile', formData, config);
             setShowEditModal(false);
             fetchProfile();
             alert('Profile updated successfully');
@@ -274,27 +275,33 @@ const Profile = () => {
                                                 <span>Upload File</span>
                                                 <input 
                                                     type="file" 
-                                                    className="hidden" 
+                                                    className="hidden"                                                        
                                                     onChange={async (e) => {
                                                         const file = e.target.files[0];
                                                         if (!file) return;
-                                                        
+
                                                         const uploadData = new FormData();
                                                         uploadData.append('image', file);
 
                                                         try {
+                                                            const token = localStorage.getItem('token');
                                                             const config = {
                                                                 headers: {
                                                                     'Content-Type': 'multipart/form-data',
-                                                                },
+                                                                    Authorization: `Bearer ${token}`
+                                                                }
                                                             };
-                                                            // Note: Hardcoded localhost for now, ideally use env
-                                                            const { data } = await axios.post('http://localhost:5000/api/upload', uploadData, config);
-                                                            // Prepend server URL to path
-                                                            const fullUrl = `http://localhost:5000${data}`;
+                                                            const { data } = await api.post('/upload', uploadData, config);
+                                                            
+                                                            // data is the file path e.g. /uploads/image-123.jpg
+                                                            // We need to construct full URL for display if it's absolute, or if it's relative
+                                                            // Ideally the backend returns partial path.
+                                                            
+                                                            const fullUrl = `${import.meta.env.VITE_API_URL.replace('/api', '')}${data}`;
                                                             setFormData(prev => ({ ...prev, profilePicture: fullUrl }));
+                                                            
                                                         } catch (error) {
-                                                            console.error(error);
+                                                            console.error("Upload failed", error);
                                                             alert('Image upload failed');
                                                         }
                                                     }}

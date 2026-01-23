@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { X } from 'lucide-react';
 
 const AddEmployeeModal = ({ isOpen, onClose, onAdd, initialData = null }) => {
     const [formData, setFormData] = useState({
         firstName: '', lastName: '', email: '', employeeId: '', password: '', 
         designation: '', department: '', phone: '', address: '', role: 'Employee',
-        basicSalary: '', hra: '', allowances: ''
+        salaryStructure: { basic: 0, hra: 0, allowances: 0 },
+        basicSalary: '', hra: '', allowances: '' // Keep flat for inputs, sync on submit
     });
 
     useEffect(() => {
@@ -16,51 +17,53 @@ const AddEmployeeModal = ({ isOpen, onClose, onAdd, initialData = null }) => {
                 lastName: initialData.lastName || '',
                 email: initialData.email || '',
                 employeeId: initialData.employeeId || '',
-                password: '', // Keep blank if not changing
+                password: '', 
                 designation: initialData.designation || '',
                 department: initialData.department || '',
                 phone: initialData.phone || '',
                 address: initialData.address || '',
                 role: initialData.role || 'Employee',
+                salaryStructure: initialData.salaryStructure || { basic: 0, hra: 0, allowances: 0 },
                 basicSalary: initialData.salaryStructure?.basic || '',
                 hra: initialData.salaryStructure?.hra || '',
                 allowances: initialData.salaryStructure?.allowances || ''
             });
         } else {
-            setFormData({
+             setFormData({
                 firstName: '', lastName: '', email: '', employeeId: '', password: '', 
                 designation: '', department: '', phone: '', address: '', role: 'Employee',
+                salaryStructure: { basic: 0, hra: 0, allowances: 0 },
                 basicSalary: '', hra: '', allowances: ''
             });
         }
     }, [initialData, isOpen]);
 
     const handleChange = (e) => {
-        setFormData({...formData, [e.target.name]: e.target.value});
+        setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const token = localStorage.getItem('token');
-        const payload = {
-            ...formData,
-            salaryStructure: {
-                basic: Number(formData.basicSalary),
-                hra: Number(formData.hra),
-                allowances: Number(formData.allowances)
-            }
-        };
-
         try {
+            const token = localStorage.getItem('token');
             const config = { headers: { Authorization: `Bearer ${token}` } };
             
+            // Construct payload associated with flat fields if needed or structure
+            const payload = {
+                ...formData,
+                salaryStructure: {
+                    basic: Number(formData.basicSalary),
+                    hra: Number(formData.hra),
+                    allowances: Number(formData.allowances)
+                }
+            };
+
             if (initialData) {
-                 await axios.put(`http://localhost:5000/api/users/${initialData._id}`, payload, config);
+                 await api.put(`/users/${initialData._id}`, payload, config);
             } else {
-                 await axios.post('http://localhost:5000/api/employees', payload, config);
+                 await api.post('/employees', payload, config);
             }
-            
-            onAdd();
+            onAdd(); // or onEmployeeAdded depending on prop name usage in parent
             onClose();
         } catch (error) {
             alert(error.response?.data?.message || 'Operation failed');

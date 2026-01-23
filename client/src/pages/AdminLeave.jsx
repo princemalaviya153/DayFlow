@@ -1,34 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
-import axios from 'axios';
-import { Check, X } from 'lucide-react';
+import api from '../utils/api';
+import { Check, X, Clock } from 'lucide-react';
 
 const AdminLeave = () => {
     const [leaves, setLeaves] = useState([]);
-    const token = localStorage.getItem('token');
+
+    const fetchLeaves = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const config = { headers: { Authorization: `Bearer ${token}` } };
+            const { data } = await api.get('/leaves/all', config);
+            setLeaves(data);
+        } catch (error) {
+            console.error("Error fetching leaves", error);
+        }
+    };
 
     useEffect(() => {
         fetchLeaves();
     }, []);
 
-    const fetchLeaves = async () => {
+    const updateStatus = async (id, status) => {
         try {
+            const token = localStorage.getItem('token');
             const config = { headers: { Authorization: `Bearer ${token}` } };
-            const { data } = await axios.get('http://localhost:5000/api/leaves/all', config);
-            setLeaves(data);
+            await api.put(`/leaves/${id}`, { status }, config);
+            fetchLeaves();
         } catch (error) {
-            console.error(error);
+            console.error("Error updating status", error);
         }
     };
 
-    const handleAction = async (id, status) => {
-        try {
-            const config = { headers: { Authorization: `Bearer ${token}` } };
-            await axios.put(`http://localhost:5000/api/leaves/${id}`, { status }, config);
-            fetchLeaves();
-        } catch (error) {
-            alert('Failed to update status');
-        }
+    const handleAction = (id, status) => {
+        updateStatus(id, status);
     };
 
     return (

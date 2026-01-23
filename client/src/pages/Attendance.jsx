@@ -1,54 +1,63 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
-import axios from 'axios';
-import { Clock, Calendar, CheckCircle } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import api from '../utils/api';
+import { MapPin, Clock, LogIn, LogOut, Calendar, CheckCircle } from 'lucide-react';
 
 const Attendance = () => {
-    const [attendanceHistory, setAttendanceHistory] = useState([]);
-    const [todayRecord, setTodayRecord] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const { user } = useAuth();
-    const token = localStorage.getItem('token');
+    const [attendance, setAttendance] = useState(null);
+    const [history, setHistory] = useState([]);
+    const [loading, setLoading] = useState(false);
+
+    // Helper to get today's date string YYYY-MM-DD
+    const today = new Date().toISOString().split('T')[0];
+
+    const fetchAttendance = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const config = { headers: { Authorization: `Bearer ${token}` } };
+            const { data } = await api.get('/attendance', config);
+            // data matches the schema: may be an array or single object? 
+            // The controller `attendanceController.js` getAttendance returns `find({ user: req.user.id })` which is an array
+            setHistory(data);
+
+            // Check if there is a record for today
+            const todayRecord = data.find(record => new Date(record.date).toISOString().split('T')[0] === today);
+            setAttendance(todayRecord || null);
+
+        } catch (error) {
+            console.error("Error fetching attendance", error);
+        }
+    };
 
     useEffect(() => {
         fetchAttendance();
     }, []);
 
-    const fetchAttendance = async () => {
+    const handleCheckIn = async () => {
+        setLoading(true);
         try {
+            const token = localStorage.getItem('token');
             const config = { headers: { Authorization: `Bearer ${token}` } };
-            const { data } = await axios.get('http://localhost:5000/api/attendance', config);
-            setAttendanceHistory(data);
-            
-            // Check for today's record
-            const today = new Date().toDateString();
-            const todayRec = data.find(rec => new Date(rec.date).toDateString() === today);
-            setTodayRecord(todayRec);
+            await api.post('/attendance/checkin', {}, config);
+            fetchAttendance();
         } catch (error) {
-            console.error("Error fetching attendance", error);
+            alert(error.response?.data?.message || 'Check-in failed');
         } finally {
             setLoading(false);
         }
     };
 
-    const handleCheckIn = async () => {
-        try {
-            const config = { headers: { Authorization: `Bearer ${token}` } };
-            await axios.post('http://localhost:5000/api/attendance/checkin', {}, config);
-            fetchAttendance();
-        } catch (error) {
-            alert(error.response?.data?.message || 'Check-in failed');
-        }
-    };
-
     const handleCheckOut = async () => {
+        setLoading(true);
         try {
+            const token = localStorage.getItem('token');
             const config = { headers: { Authorization: `Bearer ${token}` } };
-            await axios.put('http://localhost:5000/api/attendance/checkout', {}, config);
+            await api.put('/attendance/checkout', {}, config);
             fetchAttendance();
         } catch (error) {
             alert(error.response?.data?.message || 'Check-out failed');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -69,24 +78,24 @@ const Attendance = () => {
                     <div>
                         <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{new Date().toDateString()}</p>
                         <h2 className="text-3xl font-bold text-gray-900 dark:text-white mt-1">
-                            {todayRecord ? (todayRecord.checkOut ? 'Day Completed' : 'Checked In') : 'Not Checked In'}
+                            {attendance ? (attendance.checkOut ? 'Day Completed' : 'Checked In') : 'Not Checked In'}
                         </h2>
                     </div>
-                    
+
                     <div className="flex gap-4">
-                        {!todayRecord && (
+                        {!attendance && (
                             <button onClick={handleCheckIn} className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium flex items-center gap-2 transition-all shadow-lg shadow-green-200 dark:shadow-none">
                                 <Clock className="w-5 h-5" />
                                 Check In
                             </button>
                         )}
-                        {todayRecord && !todayRecord.checkOut && (
+                        {attendance && !attendance.checkOut && (
                             <button onClick={handleCheckOut} className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium flex items-center gap-2 transition-all shadow-lg shadow-red-200 dark:shadow-none">
                                 <LogOutIcon className="w-5 h-5" />
                                 Check Out
                             </button>
                         )}
-                        {todayRecord && todayRecord.checkOut && (
+                        {attendance && attendance.checkOut && (
                             <div className="px-6 py-3 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-lg font-medium flex items-center gap-2 cursor-not-allowed">
                                 <CheckCircle className="w-5 h-5" />
                                 Workday Complete
@@ -113,7 +122,7 @@ const Attendance = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                            {attendanceHistory.map((record) => (
+                            {history.map((record) => (
                                 <tr key={record._id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                                     <td className="px-6 py-4 text-gray-900 dark:text-white font-medium">
                                         {new Date(record.date).toLocaleDateString()}
@@ -143,21 +152,21 @@ const Attendance = () => {
 };
 
 const LogOutIcon = (props) => (
-    <svg 
-      xmlns="http://www.w3.org/2000/svg" 
-      width="24" 
-      height="24" 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round" 
-      {...props}
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        {...props}
     >
-      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-      <polyline points="16 17 21 12 16 7"/>
-      <line x1="21" x2="9" y1="12" y2="12"/>
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+        <polyline points="16 17 21 12 16 7" />
+        <line x1="21" x2="9" y1="12" y2="12" />
     </svg>
 );
 

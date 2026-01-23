@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
-import axios from 'axios';
-import { Search, Plus, Filter, MoreVertical } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import api from '../utils/api';
+import { Search, UserPlus, MoreVertical, Edit, Trash, Plus } from 'lucide-react';
 import AddEmployeeModal from '../components/AddEmployeeModal';
 
 const EmployeeList = () => {
     const [employees, setEmployees] = useState([]);
     const [showModal, setShowModal] = useState(false);
-    const [editingEmployee, setEditingEmployee] = useState(null);
-    const token = localStorage.getItem('token');
+    const [selectedEmployee, setSelectedEmployee] = useState(null);
 
     useEffect(() => {
         fetchEmployees();
@@ -17,21 +15,22 @@ const EmployeeList = () => {
 
     const fetchEmployees = async () => {
         try {
+            const token = localStorage.getItem('token');
             const config = { headers: { Authorization: `Bearer ${token}` } };
-            const { data } = await axios.get('http://localhost:5000/api/employees', config);
+            const { data } = await api.get('/employees', config);
             setEmployees(data);
         } catch (error) {
-            console.error(error);
+            console.error("Error fetching employees", error);
         }
     };
 
     const handleAdd = () => {
-        setEditingEmployee(null);
+        setSelectedEmployee(null);
         setShowModal(true);
     };
 
     const handleEdit = (employee) => {
-        setEditingEmployee(employee);
+        setSelectedEmployee(employee);
         setShowModal(true);
     };
 
@@ -52,7 +51,7 @@ const EmployeeList = () => {
                 isOpen={showModal} 
                 onClose={() => setShowModal(false)} 
                 onAdd={fetchEmployees} 
-                initialData={editingEmployee}
+                initialData={selectedEmployee}
             />
 
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">

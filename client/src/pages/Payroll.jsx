@@ -1,26 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
-import axios from 'axios';
-import { Download } from 'lucide-react';
+import api from '../utils/api';
+import { DollarSign, Download, Calendar } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 import { generatePayslipPDF } from '../utils/payslipGenerator';
 
 const Payroll = () => {
-    const [payslips, setPayslips] = useState([]);
-    const token = localStorage.getItem('token');
+    const [payrolls, setPayrolls] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const { user } = useAuth();
 
     useEffect(() => {
-        fetchPayslips();
+        const fetchPayroll = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const config = { headers: { Authorization: `Bearer ${token}` } };
+                const { data } = await api.get('/payroll', config);
+                setPayrolls(data);
+            } catch (error) {
+                console.error("Error fetching payroll", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchPayroll();
     }, []);
-
-    const fetchPayslips = async () => {
-        try {
-            const config = { headers: { Authorization: `Bearer ${token}` } };
-            const { data } = await axios.get('http://localhost:5000/api/payroll', config);
-            setPayslips(data);
-        } catch (error) {
-            console.error(error);
-        }
-    };
 
     return (
         <Layout>
@@ -41,21 +47,21 @@ const Payroll = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                             {payslips.map((slip) => (
-                                <tr key={slip._id}>
-                                    <td className="px-6 py-4 text-gray-900 dark:text-white font-medium">{slip.month}</td>
-                                    <td className="px-6 py-4 text-gray-600 dark:text-gray-300 transition-colors">${slip.basicSalary}</td>
-                                    <td className="px-6 py-4 text-green-600 dark:text-green-400">+${slip.allowances}</td>
-                                    <td className="px-6 py-4 text-red-600 dark:text-red-400">-${slip.deductions}</td>
-                                    <td className="px-6 py-4 font-bold text-gray-900 dark:text-white">${slip.netSalary}</td>
+                             {payrolls.map((payroll) => (
+                                <tr key={payroll._id}>
+                                    <td className="px-6 py-4 text-gray-900 dark:text-white font-medium">{payroll.month}</td>
+                                    <td className="px-6 py-4 text-gray-600 dark:text-gray-300 transition-colors">${payroll.basicSalary}</td>
+                                    <td className="px-6 py-4 text-green-600 dark:text-green-400">+${payroll.allowances}</td>
+                                    <td className="px-6 py-4 text-red-600 dark:text-red-400">-${payroll.deductions}</td>
+                                    <td className="px-6 py-4 font-bold text-gray-900 dark:text-white">${payroll.netSalary}</td>
                                     <td className="px-6 py-4">
-                                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${slip.status === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
-                                            {slip.status}
+                                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${payroll.status === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                                            {payroll.status}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4">
                                         <button 
-                                            onClick={() => generatePayslipPDF(slip)}
+                                            onClick={() => generatePayslipPDF(payroll)}
                                             className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 flex items-center gap-1 text-sm font-medium"
                                         >
                                             <Download className="w-4 h-4" /> Download

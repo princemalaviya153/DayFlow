@@ -1,26 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
-import axios from 'axios';
-import { Search } from 'lucide-react';
+import api from '../utils/api';
+import { Calendar as CalendarIcon, User, Search } from 'lucide-react';
 
 const AdminAttendance = () => {
-    const [records, setRecords] = useState([]);
+    const [attendanceData, setAttendanceData] = useState([]);
     const [loading, setLoading] = useState(true);
-    const token = localStorage.getItem('token');
 
     useEffect(() => {
-        const fetchAll = async () => {
+        const fetchAttendance = async () => {
             try {
+                const token = localStorage.getItem('token');
                 const config = { headers: { Authorization: `Bearer ${token}` } };
-                const { data } = await axios.get('http://localhost:5000/api/attendance/all', config);
-                setRecords(data);
+                const { data } = await api.get('/attendance/all', config);
+                setAttendanceData(data);
             } catch (error) {
-                console.error(error);
+                console.error("Error fetching attendance", error);
             } finally {
                 setLoading(false);
             }
         };
-        fetchAll();
+        fetchAttendance();
     }, []);
 
     const getStatusColor = (status) => {
@@ -61,7 +61,7 @@ const AdminAttendance = () => {
                         </thead>
                          <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                              {loading ? <tr><td colSpan="6" className="text-center py-8">Loading...</td></tr> : 
-                              records.map((rec) => (
+                              attendanceData.map((rec) => (
                                 <tr key={rec._id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                                     <td className="px-6 py-4">
                                         <div className="font-medium text-gray-900 dark:text-white">{rec.user?.firstName} {rec.user?.lastName}</div>

@@ -1,7 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 
-const AuthContext = createContext(null);
+const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
@@ -9,29 +9,30 @@ export const AuthProvider = ({ children }) => {
 
     useEffect(() => {
         const verifyUser = async () => {
-             const token = localStorage.getItem('token');
-             if (token) {
-                 try {
-                     const config = {
-                         headers: {
-                             Authorization: `Bearer ${token}`
-                         }
-                     };
-                     const { data } = await axios.get('http://localhost:5000/api/auth/verify', config);
-                     setUser({ ...data, token });
-                 } catch (error) {
-                     console.error("Auth verification failed", error);
-                     localStorage.removeItem('token');
-                     setUser(null);
-                 }
-             }
-             setLoading(false);
+            const token = localStorage.getItem('token');
+            if (token) {
+                try {
+                    const config = {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    };
+                    const { data } = await api.get('/auth/verify', config);
+                    setUser(data);
+                } catch (error) {
+                    console.error("Auth Verification Failed:", error);
+                    localStorage.removeItem('token');
+                    setUser(null);
+                }
+            }
+            setLoading(false);
         };
+
         verifyUser();
     }, []);
 
     const login = async (email, password) => {
-        const { data } = await axios.post('http://localhost:5000/api/auth/login', { email, password });
+        const { data } = await api.post('/auth/login', { email, password });
         localStorage.setItem('token', data.token);
         setUser(data);
         return data; // Return data for redirection logic

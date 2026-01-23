@@ -1,16 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
-import axios from 'axios';
-import { Plus, Trash2, Download } from 'lucide-react';
+import api from '../utils/api';
+import { DollarSign, Check, X, Download, Plus, Trash2 } from 'lucide-react';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 import { generatePayslipPDF } from '../utils/payslipGenerator';
 
 const AdminPayroll = () => {
     const [payrolls, setPayrolls] = useState([]);
     const [showModal, setShowModal] = useState(false);
-    const [formData, setFormData] = useState({
-        employeeId: '', month: '', basicSalary: '', allowances: '', deductions: ''
-    });
-    const token = localStorage.getItem('token');
 
     useEffect(() => {
         fetchPayrolls();
@@ -18,47 +16,53 @@ const AdminPayroll = () => {
 
     const fetchPayrolls = async () => {
         try {
+            const token = localStorage.getItem('token');
             const config = { headers: { Authorization: `Bearer ${token}` } };
-            const { data } = await axios.get('http://localhost:5000/api/payroll/all', config);
+            const { data } = await api.get('/payroll/all', config); 
             setPayrolls(data);
         } catch (error) {
-            console.error(error);
+            console.error("Error fetching payrolls", error);
         }
     };
 
-    const handleSubmit = async (e) => {
+    const handleRunPayroll = async (e) => {
         e.preventDefault();
+        const formData = new FormData(e.target);
+        const payload = Object.fromEntries(formData);
+        
         try {
+            const token = localStorage.getItem('token');
             const config = { headers: { Authorization: `Bearer ${token}` } };
-            await axios.post('http://localhost:5000/api/payroll', formData, config);
-            setShowModal(false);
+            await api.post('/payroll', payload, config);
             fetchPayrolls();
+            alert('Payroll Generated Successfully');
+            setShowModal(false);
         } catch (error) {
-            alert(error.response?.data?.message || 'Failed to generate payslip');
+            alert('Error generating payroll');
         }
     };
 
-    const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
-
-    const handleStatusUpdate = async (id, status) => {
+    const updateStatus = async (id, status) => {
         try {
+            const token = localStorage.getItem('token');
             const config = { headers: { Authorization: `Bearer ${token}` } };
-            await axios.put(`http://localhost:5000/api/payroll/${id}`, { status }, config);
+            await api.put(`/payroll/${id}`, { status }, config);
             fetchPayrolls();
         } catch (error) {
+            console.error(error);
             alert('Failed to update status');
         }
     };
 
-    const handleDelete = async (id) => {
+    const deletePayroll = async (id) => {
         if (window.confirm('Are you sure you want to delete this payroll record?')) {
             try {
+                const token = localStorage.getItem('token');
                 const config = { headers: { Authorization: `Bearer ${token}` } };
-                await axios.delete(`http://localhost:5000/api/payroll/${id}`, config);
+                await api.delete(`/payroll/${id}`, config);
                 fetchPayrolls();
             } catch (error) {
+                console.error(error);
                 alert('Failed to delete record');
             }
         }
@@ -113,7 +117,7 @@ const AdminPayroll = () => {
                                         <div className="flex items-center justify-end gap-2">
                                             {payroll.status === 'Pending' && (
                                                 <button 
-                                                    onClick={() => handleStatusUpdate(payroll._id, 'Paid')}
+                                                    onClick={() => updateStatus(payroll._id, 'Paid')}
                                                     className="text-xs px-2 py-1 bg-green-50 text-green-600 rounded border border-green-200 hover:bg-green-100 transition-colors"
                                                     title="Mark as Paid"
                                                 >
@@ -121,7 +125,7 @@ const AdminPayroll = () => {
                                                 </button>
                                             )}
                                             <button 
-                                                onClick={() => handleDelete(payroll._id)}
+                                                onClick={() => deletePayroll(payroll._id)}
                                                 className="text-red-500 hover:text-red-700 transition-colors p-1"
                                                 title="Delete Record"
                                             >
@@ -147,27 +151,27 @@ const AdminPayroll = () => {
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
                     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-6">
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Generate Payslip</h3>
-                        <form onSubmit={handleSubmit} className="space-y-4">
+                        <form onSubmit={handleRunPayroll} className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Employee ID</label>
-                                <input name="employeeId" required onChange={handleChange} className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                                <input name="employeeId" required className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Month (e.g. Jan 2026)</label>
-                                <input name="month" required onChange={handleChange} className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                                <input name="month" required className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
                             </div>
                             <div className="grid grid-cols-3 gap-3">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Basic Salary</label>
-                                    <input name="basicSalary" type="number" required onChange={handleChange} className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                                    <input name="basicSalary" type="number" required className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Allowances</label>
-                                    <input name="allowances" type="number" onChange={handleChange} className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                                    <input name="allowances" type="number" className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Deductions</label>
-                                    <input name="deductions" type="number" onChange={handleChange} className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                                    <input name="deductions" type="number" className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
                                 </div>
                             </div>
                             <div className="flex justify-end gap-3 mt-4">

@@ -1,40 +1,46 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
-import axios from 'axios';
-import { Calendar, Plus, X } from 'lucide-react';
+import api from '../utils/api';
+import { Clock, Plus, CheckCircle, XCircle, AlertCircle, X } from 'lucide-react';
 
 const Leave = () => {
     const [leaves, setLeaves] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [formData, setFormData] = useState({
-        leaveType: 'Paid', startDate: '', endDate: '', reason: ''
+        leaveType: 'Sick Leave',
+        startDate: '',
+        endDate: '',
+        reason: ''
     });
-    const token = localStorage.getItem('token');
-
-    useEffect(() => {
-        fetchLeaves();
-    }, []);
+    const [error, setError] = useState('');
 
     const fetchLeaves = async () => {
         try {
+            const token = localStorage.getItem('token');
             const config = { headers: { Authorization: `Bearer ${token}` } };
-            const { data } = await axios.get('http://localhost:5000/api/leaves', config);
+            const { data } = await api.get('/leaves', config);
             setLeaves(data);
         } catch (error) {
             console.error(error);
         }
     };
 
+    useEffect(() => {
+        fetchLeaves();
+    }, []);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setError('');
         try {
+            const token = localStorage.getItem('token');
             const config = { headers: { Authorization: `Bearer ${token}` } };
-            await axios.post('http://localhost:5000/api/leaves', formData, config);
+            await api.post('/leaves', formData, config);
             setShowModal(false);
             fetchLeaves();
-            setFormData({ leaveType: 'Paid', startDate: '', endDate: '', reason: '' });
+            setFormData({ leaveType: 'Sick Leave', startDate: '', endDate: '', reason: '' });
         } catch (error) {
-            alert('Failed to apply leave');
+            setError(error.response?.data?.message || 'Failed to submit leave request');
         }
     };
 

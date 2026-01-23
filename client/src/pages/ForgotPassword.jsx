@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { Link } from 'react-router-dom';
 import { Mail, Loader2 } from 'lucide-react';
 
@@ -15,7 +15,7 @@ const ForgotPassword = () => {
         setError('');
         setIsLoading(true);
         try {
-            const { data } = await axios.post('http://localhost:5000/api/auth/forgot-password', { email });
+            const { data } = await api.post('/auth/forgot-password', { email });
             setMessage('Email sent! Please check your inbox.');
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to send email');

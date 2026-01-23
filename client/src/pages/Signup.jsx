@@ -1,32 +1,37 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
-import { Mail, Lock, User, Briefcase } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import api from '../utils/api';
+import { User, Mail, Lock, Briefcase, Loader2 } from 'lucide-react';
 
 const Signup = () => {
     const [formData, setFormData] = useState({
-        firstName: '', lastName: '', email: '', password: '', role: 'Admin', employeeId: ''
+        employeeId: '',
+        firstName: '',
+        lastName: '',
+        email: '',
+        password: '',
+        role: 'Employee' // Default role
     });
-    const { firstName, lastName, email, password, role, employeeId } = formData;
+    const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
-    const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
+    const { employeeId, firstName, lastName, email, password, role } = formData;
 
-    const handleSubmit = async (e) => {
+    const onChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+
+    const onSubmit = async (e) => {
         e.preventDefault();
+        setError('');
+        setIsLoading(true);
         try {
-            // Basic validation
-            if (!firstName || !lastName || !email || !password || !employeeId) {
-                alert('Please fill all fields');
-                return;
-            }
-
-            const config = { headers: { 'Content-Type': 'application/json' } };
+            const config = {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            };
             const body = JSON.stringify(formData);
-
-            const res = await axios.post('http://localhost:5000/api/auth/register', body, config);
+            const res = await api.post('/auth/register', body, config);
             
             if (res.data) {
                 alert('Registration Successful! Please Login.');
@@ -35,6 +40,8 @@ const Signup = () => {
         } catch (error) {
             console.error(error);
             alert(error.response?.data?.message || 'Registration failed');
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -46,12 +53,12 @@ const Signup = () => {
                     <p className="text-gray-500 mt-2">Get started with Dayflow</p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={onSubmit} className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
                             <input 
-                                type="text" name="firstName" value={firstName} onChange={handleChange}
+                                type="text" name="firstName" value={firstName} onChange={onChange}
                                 className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
                                 required
                             />
@@ -59,7 +66,7 @@ const Signup = () => {
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
                             <input 
-                                type="text" name="lastName" value={lastName} onChange={handleChange}
+                                type="text" name="lastName" value={lastName} onChange={onChange}
                                 className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
                                 required
                             />
@@ -71,7 +78,7 @@ const Signup = () => {
                         <div className="relative">
                             <Mail className="w-5 h-5 text-gray-400 absolute left-3 top-2.5" />
                             <input 
-                                type="email" name="email" value={email} onChange={handleChange}
+                                type="email" name="email" value={email} onChange={onChange}
                                 className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
                                 required
                             />
@@ -83,7 +90,7 @@ const Signup = () => {
                         <div className="relative">
                             <User className="w-5 h-5 text-gray-400 absolute left-3 top-2.5" />
                             <input 
-                                type="text" name="employeeId" value={employeeId} onChange={handleChange}
+                                type="text" name="employeeId" value={employeeId} onChange={onChange}
                                 className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
                                 required
                             />
@@ -95,7 +102,7 @@ const Signup = () => {
                         <div className="relative">
                             <Lock className="w-5 h-5 text-gray-400 absolute left-3 top-2.5" />
                             <input 
-                                type="password" name="password" value={password} onChange={handleChange}
+                                type="password" name="password" value={password} onChange={onChange}
                                 className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
                                 required
                             />
@@ -107,7 +114,7 @@ const Signup = () => {
                         <div className="relative">
                              <Briefcase className="w-5 h-5 text-gray-400 absolute left-3 top-2.5" />
                             <select 
-                                name="role" value={role} onChange={handleChange}
+                                name="role" value={role} onChange={onChange}
                                 className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white"
                             >
                                 <option value="Admin">Admin</option>

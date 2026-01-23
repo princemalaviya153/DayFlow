@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { Users, Calendar, Briefcase, DollarSign } from 'lucide-react';
 import Layout from '../components/Layout';
@@ -18,25 +19,24 @@ const StatCard = ({ title, value, icon: Icon, color }) => (
     </div>
 );
 
-import { useNavigate } from 'react-router-dom';
-
 const AdminDashboard = () => {
     const navigate = useNavigate();
-    const [stats, setStats] = useState({
+    const { user } = useAuth();
+    const [summary, setSummary] = useState({
         totalEmployees: 0,
         presentToday: 0,
         onLeaveToday: 0,
         totalPayrollPending: 0
     });
     const [loading, setLoading] = useState(true);
-    const token = localStorage.getItem('token');
 
     useEffect(() => {
-        const fetchStats = async () => {
+        const fetchSummary = async () => {
             try {
+                const token = localStorage.getItem('token');
                 const config = { headers: { Authorization: `Bearer ${token}` } };
-                const { data } = await axios.get('http://localhost:5000/api/dashboard/summary', config);
-                setStats(data);
+                const { data } = await api.get('/dashboard/summary', config);
+                setSummary(data);
             } catch (error) {
                 console.error("Error fetching dashboard stats:", error);
             } finally {
@@ -44,20 +44,20 @@ const AdminDashboard = () => {
             }
         };
 
-        fetchStats();
-    }, [token]);
+        fetchSummary();
+    }, []);
 
     const formatCurrency = (amount) => {
-        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount || 0);
     };
 
     return (
         <Layout>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <StatCard title="Total Employees" value={loading ? '...' : stats.totalEmployees} icon={Users} color="bg-blue-500" />
-                <StatCard title="Present Today" value={loading ? '...' : stats.presentToday} icon={Calendar} color="bg-green-500" />
-                <StatCard title="On Leave" value={loading ? '...' : stats.onLeaveToday} icon={Briefcase} color="bg-orange-500" />
-                <StatCard title="Payroll Pending" value={loading ? '...' : formatCurrency(stats.totalPayrollPending)} icon={DollarSign} color="bg-purple-500" />
+                <StatCard title="Total Employees" value={loading ? '...' : summary?.totalEmployees} icon={Users} color="bg-blue-500" />
+                <StatCard title="Present Today" value={loading ? '...' : summary?.presentToday} icon={Calendar} color="bg-green-500" />
+                <StatCard title="On Leave" value={loading ? '...' : summary?.onLeaveToday} icon={Briefcase} color="bg-orange-500" />
+                <StatCard title="Payroll Pending" value={loading ? '...' : formatCurrency(summary?.totalPayrollPending)} icon={DollarSign} color="bg-purple-500" />
             </div>
 
             <div className="mt-8 bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
