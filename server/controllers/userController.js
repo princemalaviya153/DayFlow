@@ -1,13 +1,23 @@
-const User = require('../models/User');
+const prisma = require('../config/prisma');
+const bcrypt = require('bcryptjs');
 
 // @desc    Get User Profile
 // @route   GET /api/users/profile
 // @access  Private
 const getUserProfile = async (req, res) => {
     try {
-        const user = await User.findById(req.user.id).select('-password');
+        const user = await prisma.user.findUnique({
+            where: { id: req.user.id },
+            select: {
+                id: true, employeeId: true, email: true, role: true, firstName: true,
+                lastName: true, designation: true, department: true, dob: true,
+                gender: true, phone: true, address: true, profilePicture: true,
+                salaryStructure: true, documents: true, joinedDate: true
+            }
+        });
         if (user) {
-            res.json(user);
+            // Keep Mongoose compatibility for frontend
+            res.json({ ...user, _id: user.id });
         } else {
             res.status(404).json({ message: 'User not found' });
         }
@@ -21,44 +31,44 @@ const getUserProfile = async (req, res) => {
 // @access  Private
 const updateUserProfile = async (req, res) => {
     try {
-        const user = await User.findById(req.user.id);
+        const existingUser = await prisma.user.findUnique({ where: { id: req.user.id } });
 
-        if (user) {
-            // Employee can edit: Name, DOB, Gender, Address, Phone, Profile Picture
-            if (req.body.firstName) user.firstName = req.body.firstName;
-            if (req.body.lastName) user.lastName = req.body.lastName;
-            if (req.body.dob) user.dob = req.body.dob;
-            if (req.body.gender) user.gender = req.body.gender;
-            if (req.body.address) user.address = req.body.address;
-            if (req.body.phone) user.phone = req.body.phone;
-            if (req.body.profilePicture) user.profilePicture = req.body.profilePicture;
-
-            // Admin can edit all (handled via different route usually, but flexible here)
-            // But requirement says "Admin can edit all fields" -> likely via "Edit Employee" modal in Admin view.
-            // This endpoint is for "My Profile" mostly.
-            
-            // Password change logic (Optional/Basic)
-            if (req.body.password) {
-                user.password = req.body.password;
-            }
-
-            const updatedUser = await user.save();
-            res.json({
-                _id: updatedUser._id,
-                employeeId: updatedUser.employeeId,
-                email: updatedUser.email,
-                role: updatedUser.role,
-                firstName: updatedUser.firstName,
-                lastName: updatedUser.lastName,
-                phone: updatedUser.phone,
-                address: updatedUser.address,
-                profilePicture: updatedUser.profilePicture
-            });
-        } else {
-            res.status(404).json({ message: 'User not found' });
+        if (!existingUser) {
+            return res.status(404).json({ message: 'User not found' });
         }
+
+        const dataToUpdate = {};
+        if (req.body.firstName) dataToUpdate.firstName = req.body.firstName;
+        if (req.body.lastName) dataToUpdate.lastName = req.body.lastName;
+        if (req.body.dob) dataToUpdate.dob = new Date(req.body.dob);
+        if (req.body.gender) dataToUpdate.gender = req.body.gender;
+        if (req.body.address) dataToUpdate.address = req.body.address;
+        if (req.body.phone) dataToUpdate.phone = req.body.phone;
+        if (req.body.profilePicture) dataToUpdate.profilePicture = req.body.profilePicture;
+
+        if (req.body.password) {
+            const salt = await bcrypt.genSalt(10);
+            dataToUpdate.password = await bcrypt.hash(req.body.password, salt);
+        }
+
+        const updatedUser = await prisma.user.update({
+            where: { id: req.user.id },
+            data: dataToUpdate
+        });
+
+        res.json({
+            _id: updatedUser.id,
+            employeeId: updatedUser.employeeId,
+            email: updatedUser.email,
+            role: updatedUser.role,
+            firstName: updatedUser.firstName,
+            lastName: updatedUser.lastName,
+            phone: updatedUser.phone,
+            address: updatedUser.address,
+            profilePicture: updatedUser.profilePicture
+        });
     } catch (error) {
-         res.status(500).json({ message: error.message });
+        res.status(500).json({ message: error.message });
     }
 };
 
@@ -66,10 +76,18 @@ const updateUserProfile = async (req, res) => {
 // @route   GET /api/users/:id
 // @access  Private/Admin
 const getUserById = async (req, res) => {
-     try {
-        const user = await User.findById(req.params.id).select('-password');
+    try {
+        const user = await prisma.user.findUnique({
+            where: { id: req.params.id },
+            select: {
+                id: true, employeeId: true, email: true, role: true, firstName: true,
+                lastName: true, designation: true, department: true, dob: true,
+                gender: true, phone: true, address: true, profilePicture: true,
+                salaryStructure: true, documents: true, joinedDate: true
+            }
+        });
         if (user) {
-            res.json(user);
+            res.json({ ...user, _id: user.id });
         } else {
             res.status(404).json({ message: 'User not found' });
         }
@@ -83,24 +101,34 @@ const getUserById = async (req, res) => {
 // @access  Private/Admin
 const updateUserById = async (req, res) => {
     try {
-        const user = await User.findById(req.params.id);
+        const existingUser = await prisma.user.findUnique({ where: { id: req.params.id } });
 
-        if (user) {
-            user.firstName = req.body.firstName || user.firstName;
-            user.lastName = req.body.lastName || user.lastName;
-            user.email = req.body.email || user.email;
-            user.role = req.body.role || user.role;
-            user.designation = req.body.designation || user.designation;
-            user.department = req.body.department || user.department;
-            user.phone = req.body.phone || user.phone;
-            user.address = req.body.address || user.address;
-            user.salaryStructure = req.body.salaryStructure || user.salaryStructure;
-
-            const updatedUser = await user.save();
-            res.json(updatedUser);
-        } else {
-            res.status(404).json({ message: 'User not found' });
+        if (!existingUser) {
+            return res.status(404).json({ message: 'User not found' });
         }
+
+        const dataToUpdate = {};
+        if (req.body.firstName) dataToUpdate.firstName = req.body.firstName;
+        if (req.body.lastName) dataToUpdate.lastName = req.body.lastName;
+        if (req.body.email) dataToUpdate.email = req.body.email;
+        if (req.body.role) dataToUpdate.role = req.body.role;
+        if (req.body.designation) dataToUpdate.designation = req.body.designation;
+        if (req.body.department) dataToUpdate.department = req.body.department;
+        if (req.body.phone) dataToUpdate.phone = req.body.phone;
+        if (req.body.address) dataToUpdate.address = req.body.address;
+
+        // Handle salaryStructure json dynamically
+        if (req.body.salaryStructure) {
+            // Merge with existing JSON or overwrite
+            dataToUpdate.salaryStructure = req.body.salaryStructure;
+        }
+
+        const updatedUser = await prisma.user.update({
+            where: { id: req.params.id },
+            data: dataToUpdate
+        });
+
+        res.json({ ...updatedUser, _id: updatedUser.id });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

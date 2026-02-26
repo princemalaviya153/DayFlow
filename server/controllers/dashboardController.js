@@ -1,7 +1,4 @@
-const User = require('../models/User');
-const Attendance = require('../models/Attendance');
-const Leave = require('../models/Leave');
-const Payroll = require('../models/Payroll');
+const prisma = require('../config/prisma');
 
 // @desc    Get Admin Dashboard Summary Stats
 // @route   GET /api/dashboard/summary
@@ -9,7 +6,7 @@ const Payroll = require('../models/Payroll');
 const getDashboardSummary = async (req, res) => {
     try {
         // 1. Total Employees
-        const totalEmployees = await User.countDocuments({ role: 'Employee' });
+        const totalEmployees = await prisma.user.count({ where: { role: 'Employee' } });
 
         // 2. Present Today
         const today = new Date();
@@ -17,25 +14,29 @@ const getDashboardSummary = async (req, res) => {
         const tomorrow = new Date(today);
         tomorrow.setDate(tomorrow.getDate() + 1);
 
-        const presentToday = await Attendance.countDocuments({
-            date: { $gte: today, $lt: tomorrow },
-            status: 'Present'
+        const presentToday = await prisma.attendance.count({
+            where: {
+                date: { gte: today, lt: tomorrow },
+                status: 'Present'
+            }
         });
 
         // 3. On Leave Today (Approved leaves covering today)
-        const onLeaveToday = await Leave.countDocuments({
-            status: 'Approved',
-            startDate: { $lte: new Date() },
-            endDate: { $gte: new Date().setHours(0,0,0,0) } // Be careful with time comparison
+        const onLeaveToday = await prisma.leave.count({
+            where: {
+                status: 'Approved',
+                startDate: { lte: new Date() },
+                endDate: { gte: today }
+            }
         });
 
         // 4. Payroll Value (Sum of Pending Net Salaries)
-        const pendingPayrolls = await Payroll.aggregate([
-            { $match: { status: 'Pending' } },
-            { $group: { _id: null, totalPending: { $sum: '$netSalary' } } }
-        ]);
-        
-        const totalPayrollPending = pendingPayrolls.length > 0 ? pendingPayrolls[0].totalPending : 0;
+        const pendingPayrolls = await prisma.payroll.aggregate({
+            _sum: { netSalary: true },
+            where: { status: 'Pending' }
+        });
+
+        const totalPayrollPending = pendingPayrolls._sum.netSalary || 0;
 
         res.json({
             totalEmployees,

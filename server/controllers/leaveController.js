@@ -1,4 +1,4 @@
-const Leave = require('../models/Leave');
+const prisma = require('../config/prisma');
 
 // @desc    Apply for Leave
 // @route   POST /api/leaves
@@ -7,44 +7,48 @@ const applyLeave = async (req, res) => {
     try {
         const { leaveType, startDate, endDate, reason } = req.body;
 
-        // 1. Validate Dates
-        if (new Date(startDate) > new Date(endDate)) {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+
+        if (start > end) {
             return res.status(400).json({ message: 'End date cannot be before start date' });
         }
 
-        // 2. Check for Overlapping Leaves
-        const existingLeave = await Leave.findOne({
-            user: req.user.id,
-            $or: [
-                {
-                    // Case 1: New start date falls within an existing leave
-                    startDate: { $lte: new Date(startDate) },
-                    endDate: { $gte: new Date(startDate) }
-                },
-                {
-                    // Case 2: New end date falls within an existing leave
-                    startDate: { $lte: new Date(endDate) },
-                    endDate: { $gte: new Date(endDate) }
-                },
-                {
-                    // Case 3: New leave completely encompasses an existing leave
-                    startDate: { $gte: new Date(startDate) },
-                    endDate: { $lte: new Date(endDate) }
-                }
-            ],
-            status: { $ne: 'Rejected' } // Ignore rejected leaves
+        // Check for overlapping leaves
+        const existingLeave = await prisma.leave.findFirst({
+            where: {
+                userId: req.user.id,
+                status: { not: 'Rejected' },
+                OR: [
+                    {
+                        startDate: { lte: start },
+                        endDate: { gte: start }
+                    },
+                    {
+                        startDate: { lte: end },
+                        endDate: { gte: end }
+                    },
+                    {
+                        startDate: { gte: start },
+                        endDate: { lte: end }
+                    }
+                ]
+            }
         });
 
         if (existingLeave) {
             return res.status(400).json({ message: 'You already have a pending or approved leave for this period' });
         }
-        
-        const leave = await Leave.create({
-            user: req.user.id,
-            leaveType,
-            startDate,
-            endDate,
-            reason
+
+        const leave = await prisma.leave.create({
+            data: {
+                userId: req.user.id,
+                leaveType,
+                startDate: start,
+                endDate: end,
+                reason,
+                status: 'Pending'
+            }
         });
 
         res.status(201).json(leave);
@@ -58,8 +62,13 @@ const applyLeave = async (req, res) => {
 // @access  Private
 const getMyLeaves = async (req, res) => {
     try {
-        const leaves = await Leave.find({ user: req.user.id }).sort({ createdAt: -1 });
-        res.json(leaves);
+        const leaves = await prisma.leave.findMany({
+            where: { userId: req.user.id },
+            orderBy: { createdAt: 'desc' }
+        });
+
+        // Provide compatibility with mongoose _id
+        res.json(leaves.map(l => ({ ...l, _id: l.id })));
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -70,10 +79,16 @@ const getMyLeaves = async (req, res) => {
 // @access  Admin
 const getAllLeaves = async (req, res) => {
     try {
-        const leaves = await Leave.find()
-            .populate('user', 'firstName lastName employeeId')
-            .sort({ createdAt: -1 });
-        res.json(leaves);
+        const leaves = await prisma.leave.findMany({
+            include: {
+                user: {
+                    select: { firstName: true, lastName: true, employeeId: true }
+                }
+            },
+            orderBy: { createdAt: 'desc' }
+        });
+
+        res.json(leaves.map(l => ({ ...l, _id: l.id })));
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -85,17 +100,22 @@ const getAllLeaves = async (req, res) => {
 const updateLeaveStatus = async (req, res) => {
     try {
         const { status, adminComments } = req.body;
-        const leave = await Leave.findById(req.params.id);
 
-        if (!leave) {
+        const existingLeave = await prisma.leave.findUnique({ where: { id: req.params.id } });
+
+        if (!existingLeave) {
             return res.status(404).json({ message: 'Leave request not found' });
         }
 
-        leave.status = status;
-        if (adminComments) leave.adminComments = adminComments;
+        const updatedLeave = await prisma.leave.update({
+            where: { id: req.params.id },
+            data: {
+                status,
+                adminComments: adminComments || existingLeave.adminComments
+            }
+        });
 
-        await leave.save();
-        res.json(leave);
+        res.json({ ...updatedLeave, _id: updatedLeave.id });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

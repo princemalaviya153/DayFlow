@@ -1,11 +1,7 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
-const connectDB = require('./config/db');
-
-dotenv.config();
-
-connectDB();
+// Mongoose removed. DayFlow now uses Prisma / Supabase.
 
 const app = express();
 

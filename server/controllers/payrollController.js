@@ -1,5 +1,4 @@
-const Payroll = require('../models/Payroll');
-const User = require('../models/User');
+const prisma = require('../config/prisma');
 
 // @desc    Generate Payslip
 // @route   POST /api/payroll
@@ -8,20 +7,22 @@ const generatePayslip = async (req, res) => {
     try {
         const { employeeId, month, basicSalary, allowances, deductions } = req.body;
 
-        const user = await User.findOne({ employeeId });
+        const user = await prisma.user.findUnique({ where: { employeeId } });
         if (!user) {
             return res.status(404).json({ message: 'Employee not found' });
         }
 
-        const netSalary = Number(basicSalary) + Number(allowances) - Number(deductions);
+        const netSalary = Number(basicSalary) + Number(allowances || 0) - Number(deductions || 0);
 
-        const payroll = await Payroll.create({
-            user: user._id,
-            month,
-            basicSalary,
-            allowances,
-            deductions,
-            netSalary
+        const payroll = await prisma.payroll.create({
+            data: {
+                userId: user.id,
+                month,
+                basicSalary: Number(basicSalary),
+                allowances: Number(allowances || 0),
+                deductions: Number(deductions || 0),
+                netSalary
+            }
         });
 
         res.status(201).json(payroll);
@@ -35,10 +36,12 @@ const generatePayslip = async (req, res) => {
 // @access  Private
 const getMyPayslips = async (req, res) => {
     try {
-        const payslips = await Payroll.find({ user: req.user.id })
-            .populate('user', 'firstName lastName employeeId role')
-            .sort({ createdAt: -1 });
-        res.json(payslips);
+        const payslips = await prisma.payroll.findMany({
+            where: { userId: req.user.id },
+            include: { user: { select: { firstName: true, lastName: true, employeeId: true, role: true } } },
+            orderBy: { createdAt: 'desc' }
+        });
+        res.json(payslips.map(p => ({ ...p, _id: p.id })));
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -49,10 +52,11 @@ const getMyPayslips = async (req, res) => {
 // @access  Admin
 const getAllPayrolls = async (req, res) => {
     try {
-        const payrolls = await Payroll.find()
-            .populate('user', 'firstName lastName employeeId')
-            .sort({ createdAt: -1 });
-        res.json(payrolls);
+        const payrolls = await prisma.payroll.findMany({
+            include: { user: { select: { firstName: true, lastName: true, employeeId: true } } },
+            orderBy: { createdAt: 'desc' }
+        });
+        res.json(payrolls.map(p => ({ ...p, _id: p.id })));
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -63,14 +67,22 @@ const getAllPayrolls = async (req, res) => {
 // @access  Admin
 const updatePayrollStatus = async (req, res) => {
     try {
-        const payroll = await Payroll.findById(req.params.id);
-        if (payroll) {
-            payroll.status = req.body.status || payroll.status; // e.g. 'Paid'
-            if (req.body.status === 'Paid') {
-                payroll.paidDate = Date.now();
+        const existingPayroll = await prisma.payroll.findUnique({ where: { id: req.params.id } });
+
+        if (existingPayroll) {
+            const status = req.body.status || existingPayroll.status;
+            let paidDate = existingPayroll.paidDate;
+
+            if (req.body.status === 'Paid' && existingPayroll.status !== 'Paid') {
+                paidDate = new Date();
             }
-            const updatedPayroll = await payroll.save();
-            res.json(updatedPayroll);
+
+            const updatedPayroll = await prisma.payroll.update({
+                where: { id: req.params.id },
+                data: { status, paidDate }
+            });
+
+            res.json({ ...updatedPayroll, _id: updatedPayroll.id });
         } else {
             res.status(404).json({ message: 'Payroll record not found' });
         }
@@ -84,9 +96,10 @@ const updatePayrollStatus = async (req, res) => {
 // @access  Admin
 const deletePayroll = async (req, res) => {
     try {
-        const payroll = await Payroll.findById(req.params.id);
+        const payroll = await prisma.payroll.findUnique({ where: { id: req.params.id } });
+
         if (payroll) {
-            await payroll.deleteOne();
+            await prisma.payroll.delete({ where: { id: req.params.id } });
             res.json({ message: 'Payroll record removed' });
         } else {
             res.status(404).json({ message: 'Payroll record not found' });

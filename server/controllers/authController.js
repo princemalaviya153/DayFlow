@@ -1,4 +1,4 @@
-const User = require('../models/User');
+const prisma = require('../config/prisma');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
@@ -17,18 +17,23 @@ const registerUser = async (req, res) => {
     try {
         const { employeeId, email, password, firstName, lastName, role } = req.body;
 
-        const userExists = await User.findOne({ email });
+        const userExists = await prisma.user.findUnique({ where: { email } });
         if (userExists) {
             return res.status(400).json({ message: 'User already exists' });
         }
 
-        const user = await User.create({
-            employeeId,
-            email,
-            password,
-            firstName,
-            lastName,
-            role: role || 'Employee'
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        const user = await prisma.user.create({
+            data: {
+                employeeId,
+                email,
+                password: hashedPassword,
+                firstName,
+                lastName,
+                role: role || 'Employee'
+            }
         });
 
         if (user) {
@@ -54,9 +59,9 @@ const loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        const user = await User.findOne({ email });
+        const user = await prisma.user.findUnique({ where: { email } });
 
-        if (user && (await user.matchPassword(password))) {
+        if (user && (await bcrypt.compare(password, user.password))) {
             res.json({
                 _id: user.id,
                 employeeId: user.employeeId,
@@ -78,8 +83,14 @@ const loginUser = async (req, res) => {
 // @access  Private
 const verifyUser = async (req, res) => {
     try {
-        const user = await User.findById(req.user.id).select('-password');
-        res.json(user);
+        const user = await prisma.user.findUnique({
+            where: { id: req.user.id },
+            select: { id: true, employeeId: true, email: true, role: true, firstName: true, lastName: true }
+        });
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        // Return object with _id to maintain frontend compatibility
+        res.json({ ...user, _id: user.id });
     } catch (error) {
         res.status(404).json({ message: 'User not found' });
     }
@@ -90,25 +101,29 @@ const verifyUser = async (req, res) => {
 // @access  Public
 const forgotPassword = async (req, res) => {
     try {
-        const user = await User.findOne({ email: req.body.email });
+        const user = await prisma.user.findUnique({ where: { email: req.body.email } });
 
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        // Get reset token
-        const resetToken = user.getResetPasswordToken();
+        // Generate token
+        const resetToken = crypto.randomBytes(20).toString('hex');
 
-        await user.save({ validateBeforeSave: false });
+        // Hash token and set it
+        const resetPasswordToken = crypto
+            .createHash('sha256')
+            .update(resetToken)
+            .digest('hex');
 
-        // Create reset url
-        // Assuming client runs on port 5173 by default or use env
-        const resetUrl = `${req.protocol}://${req.get('host')}/api/auth/reset-password/${resetToken}`;
-        // Note: The above URL is usually for the API. 
-        // For the frontend link, we want something like: http://localhost:5173/reset-password/TOKEN
-        // But for the email content, let's use the Frontend URL.
+        const resetPasswordExpire = new Date(Date.now() + 10 * 60 * 1000); // 10 Minutes
+
+        await prisma.user.update({
+            where: { email: user.email },
+            data: { resetPasswordToken, resetPasswordExpire }
+        });
+
         const frontendUrl = `http://localhost:5173/reset-password/${resetToken}`;
-
         const message = `You are receiving this email because you (or someone else) has requested the reset of a password. Please make a PUT request to: \n\n ${frontendUrl}`;
 
         try {
@@ -120,10 +135,10 @@ const forgotPassword = async (req, res) => {
 
             res.status(200).json({ success: true, data: 'Email sent' });
         } catch (error) {
-            user.resetPasswordToken = undefined;
-            user.resetPasswordExpire = undefined;
-
-            await user.save({ validateBeforeSave: false });
+            await prisma.user.update({
+                where: { email: user.email },
+                data: { resetPasswordToken: null, resetPasswordExpire: null }
+            });
 
             return res.status(500).json({ message: 'Email could not be sent' });
         }
@@ -143,9 +158,11 @@ const resetPassword = async (req, res) => {
             .update(req.params.token)
             .digest('hex');
 
-        const user = await User.findOne({
-            resetPasswordToken,
-            resetPasswordExpire: { $gt: Date.now() }
+        const user = await prisma.user.findFirst({
+            where: {
+                resetPasswordToken,
+                resetPasswordExpire: { gt: new Date() }
+            }
         });
 
         if (!user) {
@@ -153,18 +170,24 @@ const resetPassword = async (req, res) => {
         }
 
         // Set new password
-        user.password = req.body.password;
-        user.resetPasswordToken = undefined;
-        user.resetPasswordExpire = undefined;
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(req.body.password, salt);
 
-        await user.save();
+        const updatedUser = await prisma.user.update({
+            where: { id: user.id },
+            data: {
+                password: hashedPassword,
+                resetPasswordToken: null,
+                resetPasswordExpire: null
+            }
+        });
 
-        res.status(200).json({   
-            _id: user.id,
-            employeeId: user.employeeId,
-            email: user.email,
-            role: user.role,
-            token: generateToken(user.id),
+        res.status(200).json({
+            _id: updatedUser.id,
+            employeeId: updatedUser.employeeId,
+            email: updatedUser.email,
+            role: updatedUser.role,
+            token: generateToken(updatedUser.id),
         });
     } catch (error) {
         res.status(500).json({ message: error.message });

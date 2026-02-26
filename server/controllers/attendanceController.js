@@ -1,4 +1,4 @@
-const Attendance = require('../models/Attendance');
+const prisma = require('../config/prisma');
 
 // @desc    Check In
 // @route   POST /api/attendance/checkin
@@ -9,20 +9,28 @@ const checkIn = async (req, res) => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
-        const existingAttendance = await Attendance.findOne({ 
-            user: userId, 
-            date: today 
+        // Check if already checked in today
+        const existingAttendance = await prisma.attendance.findFirst({
+            where: {
+                userId: userId,
+                date: {
+                    gte: today,
+                    lt: new Date(today.getTime() + 24 * 60 * 60 * 1000)
+                }
+            }
         });
 
         if (existingAttendance) {
             return res.status(400).json({ message: 'Already checked in today' });
         }
 
-        const attendance = await Attendance.create({
-            user: userId,
-            date: today,
-            checkIn: new Date(),
-            status: 'Present'
+        const attendance = await prisma.attendance.create({
+            data: {
+                userId,
+                date: today,
+                checkIn: new Date(),
+                status: 'Present' // from enum
+            }
         });
 
         res.status(201).json(attendance);
@@ -40,9 +48,14 @@ const checkOut = async (req, res) => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
-        const attendance = await Attendance.findOne({ 
-            user: userId, 
-            date: today 
+        const attendance = await prisma.attendance.findFirst({
+            where: {
+                userId: userId,
+                date: {
+                    gte: today,
+                    lt: new Date(today.getTime() + 24 * 60 * 60 * 1000)
+                }
+            }
         });
 
         if (!attendance) {
@@ -53,20 +66,25 @@ const checkOut = async (req, res) => {
             return res.status(400).json({ message: 'Already checked out today' });
         }
 
-        attendance.checkOut = new Date();
-        
-        // Calculate work hours
-        const diff = attendance.checkOut - attendance.checkIn;
+        const checkOutTime = new Date();
+        const diff = checkOutTime - new Date(attendance.checkIn);
         const hours = diff / (1000 * 60 * 60);
-        attendance.workHours = hours.toFixed(2);
 
+        let status = attendance.status;
         if (hours < 4) {
-            attendance.status = 'Half-day';
+            status = 'Half_day';
         }
 
-        await attendance.save();
+        const updatedAttendance = await prisma.attendance.update({
+            where: { id: attendance.id },
+            data: {
+                checkOut: checkOutTime,
+                workHours: parseFloat(hours.toFixed(2)),
+                status
+            }
+        });
 
-        res.json(attendance);
+        res.json(updatedAttendance);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -78,8 +96,11 @@ const checkOut = async (req, res) => {
 const getAttendance = async (req, res) => {
     try {
         const userId = req.user.id;
-        const attendance = await Attendance.find({ user: userId }).sort({ date: -1 });
-        res.json(attendance);
+        const attendances = await prisma.attendance.findMany({
+            where: { userId },
+            orderBy: { date: 'desc' }
+        });
+        res.json(attendances);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -90,10 +111,17 @@ const getAttendance = async (req, res) => {
 // @access  Admin
 const getAllAttendance = async (req, res) => {
     try {
-        const attendance = await Attendance.find()
-            .populate('user', 'firstName lastName email employeeId')
-            .sort({ date: -1 });
-        res.json(attendance);
+        const attendances = await prisma.attendance.findMany({
+            include: {
+                user: {
+                    select: { firstName: true, lastName: true, email: true, employeeId: true }
+                }
+            },
+            orderBy: { date: 'desc' }
+        });
+
+        // Map so user.firstName matches what frontend expects for mongoose populate
+        res.json(attendances);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
