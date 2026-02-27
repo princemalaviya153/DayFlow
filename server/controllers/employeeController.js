@@ -1,5 +1,6 @@
 const prisma = require('../config/prisma');
 const bcrypt = require('bcryptjs');
+const { generateEmployeeId } = require('../utils/generateId');
 
 // @desc    Get all employees
 // @route   GET /api/employees
@@ -29,7 +30,7 @@ const getEmployees = async (req, res) => {
 // @access  Admin
 const addEmployee = async (req, res) => {
     try {
-        const { employeeId, email, password, firstName, lastName, designation, department, phone, address } = req.body;
+        const { email, password, firstName, lastName, designation, department, phone, address } = req.body;
 
         const userExists = await prisma.user.findUnique({ where: { email } });
         if (userExists) {
@@ -39,9 +40,11 @@ const addEmployee = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
+        const newEmployeeId = await generateEmployeeId();
+
         const user = await prisma.user.create({
             data: {
-                employeeId,
+                employeeId: newEmployeeId,
                 email,
                 password: hashedPassword,
                 firstName,

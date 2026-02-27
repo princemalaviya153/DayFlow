@@ -4,7 +4,7 @@ import { X } from 'lucide-react';
 
 const AddEmployeeModal = ({ isOpen, onClose, onAdd, initialData = null }) => {
     const [formData, setFormData] = useState({
-        firstName: '', lastName: '', email: '', employeeId: '', password: '', 
+        firstName: '', lastName: '', email: '', password: '',
         designation: '', department: '', phone: '', address: '', role: 'Employee',
         salaryStructure: { basic: 0, hra: 0, allowances: 0 },
         basicSalary: '', hra: '', allowances: '' // Keep flat for inputs, sync on submit
@@ -16,8 +16,7 @@ const AddEmployeeModal = ({ isOpen, onClose, onAdd, initialData = null }) => {
                 firstName: initialData.firstName || '',
                 lastName: initialData.lastName || '',
                 email: initialData.email || '',
-                employeeId: initialData.employeeId || '',
-                password: '', 
+                password: '',
                 designation: initialData.designation || '',
                 department: initialData.department || '',
                 phone: initialData.phone || '',
@@ -29,8 +28,8 @@ const AddEmployeeModal = ({ isOpen, onClose, onAdd, initialData = null }) => {
                 allowances: initialData.salaryStructure?.allowances || ''
             });
         } else {
-             setFormData({
-                firstName: '', lastName: '', email: '', employeeId: '', password: '', 
+            setFormData({
+                firstName: '', lastName: '', email: '', password: '',
                 designation: '', department: '', phone: '', address: '', role: 'Employee',
                 salaryStructure: { basic: 0, hra: 0, allowances: 0 },
                 basicSalary: '', hra: '', allowances: ''
@@ -47,7 +46,7 @@ const AddEmployeeModal = ({ isOpen, onClose, onAdd, initialData = null }) => {
         try {
             const token = localStorage.getItem('token');
             const config = { headers: { Authorization: `Bearer ${token}` } };
-            
+
             // Construct payload associated with flat fields if needed or structure
             const payload = {
                 ...formData,
@@ -59,9 +58,9 @@ const AddEmployeeModal = ({ isOpen, onClose, onAdd, initialData = null }) => {
             };
 
             if (initialData) {
-                 await api.put(`/users/${initialData._id}`, payload, config);
+                await api.put(`/users/${initialData._id}`, payload, config);
             } else {
-                 await api.post('/employees', payload, config);
+                await api.post('/employees', payload, config);
             }
             onAdd(); // or onEmployeeAdded depending on prop name usage in parent
             onClose();
@@ -87,20 +86,22 @@ const AddEmployeeModal = ({ isOpen, onClose, onAdd, initialData = null }) => {
                         <input name="firstName" placeholder="First Name" value={formData.firstName} onChange={handleChange} required className="input-field" />
                         <input name="lastName" placeholder="Last Name" value={formData.lastName} onChange={handleChange} required className="input-field" />
                         <input name="email" type="email" placeholder="Email" value={formData.email} onChange={handleChange} required className="input-field" />
-                        <input name="employeeId" placeholder="Employee ID (e.g. EMP001)" value={formData.employeeId} onChange={handleChange} required className="input-field" disabled={!!initialData} />
+                        {initialData && (
+                            <input name="employeeId" placeholder="Employee ID" value={initialData.employeeId} disabled className="input-field bg-gray-100 dark:bg-gray-700 cursor-not-allowed" title="Employee ID is auto-generated and cannot be changed" />
+                        )}
                     </div>
 
                     {!initialData && (
-                         <input name="password" type="password" placeholder="Password" value={formData.password} onChange={handleChange} required className="input-field w-full" />
+                        <input name="password" type="password" placeholder="Password" value={formData.password} onChange={handleChange} required className="input-field w-full" />
                     )}
 
                     <div className="grid grid-cols-2 gap-4">
                         <input name="designation" placeholder="Designation" value={formData.designation} onChange={handleChange} className="input-field" />
                         <input name="department" placeholder="Department" value={formData.department} onChange={handleChange} className="input-field" />
                         <input name="phone" placeholder="Phone" value={formData.phone} onChange={handleChange} className="input-field" />
-                        <select name="role" value={formData.role} onChange={handleChange} className="input-field">
-                            <option value="Employee">Employee</option>
-                            <option value="Admin">Admin</option>
+                        <select name="role" value={formData.role} onChange={handleChange} className="input-field bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                            <option value="Employee" className="bg-white dark:bg-gray-800">Employee</option>
+                            <option value="Admin" className="bg-white dark:bg-gray-800">Admin</option>
                         </select>
                     </div>
 
@@ -109,9 +110,9 @@ const AddEmployeeModal = ({ isOpen, onClose, onAdd, initialData = null }) => {
                     <div className="border-t pt-4 border-gray-200 dark:border-gray-700">
                         <h4 className="text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300">Salary Structure</h4>
                         <div className="grid grid-cols-3 gap-4">
-                             <input name="basicSalary" type="number" placeholder="Basic Salary" value={formData.basicSalary} onChange={handleChange} className="input-field" />
-                             <input name="hra" type="number" placeholder="HRA" value={formData.hra} onChange={handleChange} className="input-field" />
-                             <input name="allowances" type="number" placeholder="Allowances" value={formData.allowances} onChange={handleChange} className="input-field" />
+                            <input name="basicSalary" type="number" placeholder="Basic Salary" value={formData.basicSalary} onChange={handleChange} className="input-field" />
+                            <input name="hra" type="number" placeholder="HRA" value={formData.hra} onChange={handleChange} className="input-field" />
+                            <input name="allowances" type="number" placeholder="Allowances" value={formData.allowances} onChange={handleChange} className="input-field" />
                         </div>
                     </div>
 
@@ -120,7 +121,7 @@ const AddEmployeeModal = ({ isOpen, onClose, onAdd, initialData = null }) => {
                     </button>
                 </form>
             </div>
-            
+
             <style jsx>{`
                 .input-field {
                     width: 100%;

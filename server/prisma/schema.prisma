@@ -32,6 +32,8 @@ model User {
   attendances         Attendance[]
   leaves              Leave[]
   payrolls            Payroll[]
+  authoredAnnouncements Announcement[] @relation("AuthoredAnnouncements")
+  announcementReads   AnnouncementRead[]
 }
 
 model Attendance {
@@ -109,4 +111,54 @@ enum LeaveStatus {
 enum PayrollStatus {
   Pending
   Paid
+}
+
+enum AnnouncementCategory {
+  General
+  Holiday
+  Policy
+  Urgent
+}
+
+enum AnnouncementPriority {
+  Normal
+  High
+}
+
+enum TargetRole {
+  All
+  Employee
+  Admin
+}
+
+model Announcement {
+  id          String                 @id @default(uuid())
+  title       String
+  content     String                 @db.Text
+  category    AnnouncementCategory   @default(General)
+  priority    AnnouncementPriority   @default(Normal)
+  
+  authorId    String
+  author      User                   @relation("AuthoredAnnouncements", fields: [authorId], references: [id])
+  
+  publishedAt DateTime               @default(now())
+  expiresAt   DateTime?
+  isPinned    Boolean                @default(false)
+  targetRole  TargetRole             @default(All)
+
+  reads       AnnouncementRead[]
+  
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+}
+
+model AnnouncementRead {
+  id             String       @id @default(uuid())
+  announcementId String
+  announcement   Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  readAt         DateTime     @default(now())
+
+  @@unique([announcementId, userId]) // Ensure a user can only have one read receipt per announcement
 }

@@ -20,6 +20,7 @@ const payrollRoutes = require('./routes/payroll');
 const userRoutes = require('./routes/userRoutes');
 const dashboardRoutes = require('./routes/dashboard');
 const uploadRoutes = require('./routes/uploadRoutes');
+const announcementRoutes = require('./routes/announcementRoutes');
 const path = require('path');
 
 app.use('/api/auth', authRoutes);
@@ -30,6 +31,7 @@ app.use('/api/payroll', payrollRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/announcements', announcementRoutes);
 
 app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
 

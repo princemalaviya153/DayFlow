@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const sendEmail = require('../utils/email');
+const { generateEmployeeId } = require('../utils/generateId');
 
 const generateToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -15,7 +16,7 @@ const generateToken = (id) => {
 // @access  Public (for now) / Admin
 const registerUser = async (req, res) => {
     try {
-        const { employeeId, email, password, firstName, lastName, role } = req.body;
+        const { email, password, firstName, lastName, role } = req.body;
 
         const userExists = await prisma.user.findUnique({ where: { email } });
         if (userExists) {
@@ -25,9 +26,11 @@ const registerUser = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
+        const newEmployeeId = await generateEmployeeId();
+
         const user = await prisma.user.create({
             data: {
-                employeeId,
+                employeeId: newEmployeeId,
                 email,
                 password: hashedPassword,
                 firstName,

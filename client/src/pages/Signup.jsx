@@ -5,7 +5,6 @@ import { User, Mail, Lock, Briefcase, Loader2 } from 'lucide-react';
 
 const Signup = () => {
     const [formData, setFormData] = useState({
-        employeeId: '',
         firstName: '',
         lastName: '',
         email: '',
@@ -15,8 +14,7 @@ const Signup = () => {
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
-
-    const { employeeId, firstName, lastName, email, password, role } = formData;
+    const { firstName, lastName, email, password, role } = formData;
 
     const onChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
@@ -32,7 +30,7 @@ const Signup = () => {
             };
             const body = JSON.stringify(formData);
             const res = await api.post('/auth/register', body, config);
-            
+
             if (res.data) {
                 alert('Registration Successful! Please Login.');
                 navigate('/login');
@@ -57,7 +55,7 @@ const Signup = () => {
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
-                            <input 
+                            <input
                                 type="text" name="firstName" value={firstName} onChange={onChange}
                                 className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
                                 required
@@ -65,7 +63,7 @@ const Signup = () => {
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
-                            <input 
+                            <input
                                 type="text" name="lastName" value={lastName} onChange={onChange}
                                 className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
                                 required
@@ -77,20 +75,8 @@ const Signup = () => {
                         <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                         <div className="relative">
                             <Mail className="w-5 h-5 text-gray-400 absolute left-3 top-2.5" />
-                            <input 
+                            <input
                                 type="email" name="email" value={email} onChange={onChange}
-                                className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                                required
-                            />
-                        </div>
-                    </div>
-
-                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Employee ID</label>
-                        <div className="relative">
-                            <User className="w-5 h-5 text-gray-400 absolute left-3 top-2.5" />
-                            <input 
-                                type="text" name="employeeId" value={employeeId} onChange={onChange}
                                 className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
                                 required
                             />
@@ -101,7 +87,7 @@ const Signup = () => {
                         <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
                         <div className="relative">
                             <Lock className="w-5 h-5 text-gray-400 absolute left-3 top-2.5" />
-                            <input 
+                            <input
                                 type="password" name="password" value={password} onChange={onChange}
                                 className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
                                 required
@@ -112,13 +98,13 @@ const Signup = () => {
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
                         <div className="relative">
-                             <Briefcase className="w-5 h-5 text-gray-400 absolute left-3 top-2.5" />
-                            <select 
+                            <Briefcase className="w-5 h-5 text-gray-400 absolute left-3 top-2.5" />
+                            <select
                                 name="role" value={role} onChange={onChange}
-                                className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white"
+                                className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white text-gray-900"
                             >
-                                <option value="Admin">Admin</option>
-                                <option value="Employee">Employee</option>
+                                <option value="Admin" className="bg-white">Admin</option>
+                                <option value="Employee" className="bg-white">Employee</option>
                             </select>
                         </div>
                     </div>
@@ -128,7 +114,7 @@ const Signup = () => {
                     </button>
                 </form>
 
-                 <div className="mt-6 text-center">
+                <div className="mt-6 text-center">
                     <p className="text-gray-600">
                         Already have an account? <Link to="/login" className="text-blue-600 font-medium hover:underline">Sign In</Link>
                     </p>

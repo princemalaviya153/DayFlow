@@ -54,7 +54,7 @@ const Leave = () => {
         <Layout>
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-white">My Leaves</h1>
-                <button 
+                <button
                     onClick={() => setShowModal(true)}
                     className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                 >
@@ -104,45 +104,45 @@ const Leave = () => {
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Type</label>
-                                <select 
-                                    className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                <select
+                                    className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white bg-white text-gray-900 focus:ring-2 focus:ring-blue-500"
                                     value={formData.leaveType}
-                                    onChange={(e) => setFormData({...formData, leaveType: e.target.value})}
+                                    onChange={(e) => setFormData({ ...formData, leaveType: e.target.value })}
                                 >
-                                    <option>Paid</option>
-                                    <option>Sick</option>
-                                    <option>Unpaid</option>
+                                    <option className="bg-white dark:bg-gray-700">Paid</option>
+                                    <option className="bg-white dark:bg-gray-700">Sick</option>
+                                    <option className="bg-white dark:bg-gray-700">Unpaid</option>
                                 </select>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Date</label>
-                                    <input 
-                                        type="date" 
-                                        required 
+                                    <input
+                                        type="date"
+                                        required
                                         className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                         value={formData.startDate}
-                                        onChange={(e) => setFormData({...formData, startDate: e.target.value})}
+                                        onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">End Date</label>
-                                    <input 
-                                        type="date" 
-                                        required 
+                                    <input
+                                        type="date"
+                                        required
                                         className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                         value={formData.endDate}
-                                        onChange={(e) => setFormData({...formData, endDate: e.target.value})}
+                                        onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
                                     />
                                 </div>
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Reason</label>
-                                <textarea 
+                                <textarea
                                     className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                     rows="3"
                                     value={formData.reason}
-                                    onChange={(e) => setFormData({...formData, reason: e.target.value})}
+                                    onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
                                 ></textarea>
                             </div>
                             <button type="submit" className="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Submit Request</button>

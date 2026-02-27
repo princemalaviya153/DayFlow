@@ -61,7 +61,7 @@ const Profile = () => {
         <Layout>
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-white">My Profile</h1>
-                <button 
+                <button
                     onClick={() => setShowEditModal(true)}
                     className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                 >
@@ -92,19 +92,19 @@ const Profile = () => {
 
             {/* Navigation Tabs */}
             <div className="flex border-b border-gray-200 dark:border-gray-700 mb-6">
-                <button 
+                <button
                     onClick={() => setActiveTab('overview')}
                     className={`px-6 py-3 font-medium text-sm transition-colors border-b-2 ${activeTab === 'overview' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}
                 >
                     Overview
                 </button>
-                <button 
+                <button
                     onClick={() => setActiveTab('salary')}
                     className={`px-6 py-3 font-medium text-sm transition-colors border-b-2 ${activeTab === 'salary' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}
                 >
                     Salary Structure
                 </button>
-                 <button 
+                <button
                     onClick={() => setActiveTab('documents')}
                     className={`px-6 py-3 font-medium text-sm transition-colors border-b-2 ${activeTab === 'documents' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}
                 >
@@ -117,7 +117,7 @@ const Profile = () => {
                 {activeTab === 'overview' && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div>
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2"><User className="w-5 h-5 text-blue-500"/> Personal Details</h3>
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2"><User className="w-5 h-5 text-blue-500" /> Personal Details</h3>
                             <div className="space-y-3">
                                 <div className="grid grid-cols-3 text-sm"><span className="text-gray-500">Full Name</span> <span className="col-span-2 text-gray-900 dark:text-white font-medium">{profile.firstName} {profile.lastName}</span></div>
                                 <div className="grid grid-cols-3 text-sm"><span className="text-gray-500">Date of Birth</span> <span className="col-span-2 text-gray-900 dark:text-white font-medium">{profile.dob ? new Date(profile.dob).toLocaleDateString() : '-'}</span></div>
@@ -126,8 +126,8 @@ const Profile = () => {
                             </div>
                         </div>
                         <div>
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2"><Briefcase className="w-5 h-5 text-blue-500"/> Job Details</h3>
-                             <div className="space-y-3">
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2"><Briefcase className="w-5 h-5 text-blue-500" /> Job Details</h3>
+                            <div className="space-y-3">
                                 <div className="grid grid-cols-3 text-sm"><span className="text-gray-500">Employee ID</span> <span className="col-span-2 text-gray-900 dark:text-white font-medium">{profile.employeeId}</span></div>
                                 <div className="grid grid-cols-3 text-sm"><span className="text-gray-500">Department</span> <span className="col-span-2 text-gray-900 dark:text-white font-medium">{profile.department}</span></div>
                                 <div className="grid grid-cols-3 text-sm"><span className="text-gray-500">Designation</span> <span className="col-span-2 text-gray-900 dark:text-white font-medium">{profile.designation}</span></div>
@@ -139,48 +139,48 @@ const Profile = () => {
 
                 {activeTab === 'salary' && (
                     <div>
-                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2"><DollarSign className="w-5 h-5 text-green-500"/> Salary Details</h3>
-                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                             <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                                 <p className="text-sm text-gray-500">Basic Salary</p>
-                                 <p className="text-xl font-bold text-gray-900 dark:text-white">${profile.salaryStructure?.basic || 0}</p>
-                             </div>
-                             <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                                 <p className="text-sm text-gray-500">HRA</p>
-                                 <p className="text-xl font-bold text-gray-900 dark:text-white">${profile.salaryStructure?.hra || 0}</p>
-                             </div>
-                             <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                                 <p className="text-sm text-gray-500">Other Allowances</p>
-                                 <p className="text-xl font-bold text-gray-900 dark:text-white">${profile.salaryStructure?.allowances || 0}</p>
-                             </div>
-                             <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-100 dark:border-green-900/30">
-                                 <p className="text-sm text-green-600 dark:text-green-400">Gross Salary</p>
-                                 <p className="text-xl font-bold text-green-700 dark:text-green-400">
-                                     ${(profile.salaryStructure?.basic || 0) + (profile.salaryStructure?.hra || 0) + (profile.salaryStructure?.allowances || 0)}
-                                 </p>
-                             </div>
-                         </div>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2"><DollarSign className="w-5 h-5 text-green-500" /> Salary Details</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                                <p className="text-sm text-gray-500">Basic Salary</p>
+                                <p className="text-xl font-bold text-gray-900 dark:text-white">${profile.salaryStructure?.basic || 0}</p>
+                            </div>
+                            <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                                <p className="text-sm text-gray-500">HRA</p>
+                                <p className="text-xl font-bold text-gray-900 dark:text-white">${profile.salaryStructure?.hra || 0}</p>
+                            </div>
+                            <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                                <p className="text-sm text-gray-500">Other Allowances</p>
+                                <p className="text-xl font-bold text-gray-900 dark:text-white">${profile.salaryStructure?.allowances || 0}</p>
+                            </div>
+                            <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-100 dark:border-green-900/30">
+                                <p className="text-sm text-green-600 dark:text-green-400">Gross Salary</p>
+                                <p className="text-xl font-bold text-green-700 dark:text-green-400">
+                                    ${(profile.salaryStructure?.basic || 0) + (profile.salaryStructure?.hra || 0) + (profile.salaryStructure?.allowances || 0)}
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 )}
 
-                 {activeTab === 'documents' && (
+                {activeTab === 'documents' && (
                     <div>
-                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2"><FileText className="w-5 h-5 text-orange-500"/> Documents</h3>
-                         {profile.documents && profile.documents.length > 0 ? (
-                             <ul className="space-y-2">
-                                 {profile.documents.map((doc, index) => (
-                                     <li key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                                         <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{doc.name}</span>
-                                         <a href={doc.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-sm">View</a>
-                                     </li>
-                                 ))}
-                             </ul>
-                         ) : (
-                             <div className="text-center py-10 text-gray-500">
-                                 <FileText className="w-12 h-12 mx-auto mb-2 opacity-20" />
-                                 <p>No documents uploaded.</p>
-                             </div>
-                         )}
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2"><FileText className="w-5 h-5 text-orange-500" /> Documents</h3>
+                        {profile.documents && profile.documents.length > 0 ? (
+                            <ul className="space-y-2">
+                                {profile.documents.map((doc, index) => (
+                                    <li key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                        <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{doc.name}</span>
+                                        <a href={doc.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-sm">View</a>
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <div className="text-center py-10 text-gray-500">
+                                <FileText className="w-12 h-12 mx-auto mb-2 opacity-20" />
+                                <p>No documents uploaded.</p>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
@@ -191,63 +191,63 @@ const Profile = () => {
                     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-2xl p-6 overflow-y-auto max-h-[90vh]">
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Edit Profile</h3>
                         <form onSubmit={handleUpdate} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                             <div>
+                            <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">First Name</label>
-                                <input 
-                                    type="text" 
+                                <input
+                                    type="text"
                                     className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                     value={formData.firstName}
-                                    onChange={(e) => setFormData({...formData, firstName: e.target.value})}
+                                    onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
                                 />
                             </div>
-                             <div>
+                            <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Last Name</label>
-                                <input 
-                                    type="text" 
+                                <input
+                                    type="text"
                                     className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                     value={formData.lastName}
-                                    onChange={(e) => setFormData({...formData, lastName: e.target.value})}
+                                    onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
                                 />
                             </div>
-                             <div>
+                            <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date of Birth</label>
-                                <input 
-                                    type="date" 
+                                <input
+                                    type="date"
                                     className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                     value={formData.dob ? formData.dob.split('T')[0] : ''}
-                                    onChange={(e) => setFormData({...formData, dob: e.target.value})}
+                                    onChange={(e) => setFormData({ ...formData, dob: e.target.value })}
                                 />
                             </div>
-                             <div>
+                            <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Gender</label>
-                                <select 
-                                    className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                <select
+                                    className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white bg-white text-gray-900 focus:ring-2 focus:ring-blue-500"
                                     value={formData.gender}
-                                    onChange={(e) => setFormData({...formData, gender: e.target.value})}
+                                    onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
                                 >
-                                    <option value="">Select Gender</option>
-                                    <option value="Male">Male</option>
-                                    <option value="Female">Female</option>
-                                    <option value="Other">Other</option>
+                                    <option value="" className="bg-white dark:bg-gray-700">Select Gender</option>
+                                    <option value="Male" className="bg-white dark:bg-gray-700">Male</option>
+                                    <option value="Female" className="bg-white dark:bg-gray-700">Female</option>
+                                    <option value="Other" className="bg-white dark:bg-gray-700">Other</option>
                                 </select>
                             </div>
 
-                             <div className="md:col-span-2">
+                            <div className="md:col-span-2">
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phone Number</label>
-                                <input 
-                                    type="text" 
+                                <input
+                                    type="text"
                                     className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                     value={formData.phone}
-                                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                                 />
                             </div>
                             <div className="md:col-span-2">
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Address</label>
-                                <textarea 
+                                <textarea
                                     className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                     rows="2"
                                     value={formData.address}
-                                    onChange={(e) => setFormData({...formData, address: e.target.value})}
+                                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                                 />
                             </div>
                             <div className="md:col-span-2">
@@ -273,9 +273,9 @@ const Profile = () => {
                                         <div className="flex items-center gap-2">
                                             <label className="cursor-pointer px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg text-sm font-medium transition-colors">
                                                 <span>Upload File</span>
-                                                <input 
-                                                    type="file" 
-                                                    className="hidden"                                                        
+                                                <input
+                                                    type="file"
+                                                    className="hidden"
                                                     onChange={async (e) => {
                                                         const file = e.target.files[0];
                                                         if (!file) return;
@@ -292,14 +292,14 @@ const Profile = () => {
                                                                 }
                                                             };
                                                             const { data } = await api.post('/upload', uploadData, config);
-                                                            
+
                                                             // data is the file path e.g. /uploads/image-123.jpg
                                                             // We need to construct full URL for display if it's absolute, or if it's relative
                                                             // Ideally the backend returns partial path.
-                                                            
+
                                                             const fullUrl = `${import.meta.env.VITE_API_URL.replace('/api', '')}${data}`;
                                                             setFormData(prev => ({ ...prev, profilePicture: fullUrl }));
-                                                            
+
                                                         } catch (error) {
                                                             console.error("Upload failed", error);
                                                             alert('Image upload failed');
@@ -312,7 +312,7 @@ const Profile = () => {
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div className="md:col-span-2 flex justify-end gap-3 mt-4">
                                 <button type="button" onClick={() => setShowEditModal(false)} className="px-4 py-2 bg-gray-100 rounded-lg dark:bg-gray-700">Cancel</button>
                                 <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Save Changes</button>
