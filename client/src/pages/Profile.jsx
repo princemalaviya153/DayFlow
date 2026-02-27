@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import axios from 'axios';
 import api from '../utils/api';
-import { User, Mail, Phone, MapPin, Briefcase, Calendar, Camera, Upload, Edit, FileText, DollarSign } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Briefcase, Calendar, Camera, Upload, Edit, FileText, DollarSign, Bell } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import toast from 'react-hot-toast';
 
 const Profile = () => {
     const { user: authUser } = useAuth();
@@ -14,6 +15,7 @@ const Profile = () => {
     const [formData, setFormData] = useState({
         firstName: '', lastName: '', dob: '', gender: '', phone: '', address: '', profilePicture: ''
     });
+    const [preferences, setPreferences] = useState([]);
 
     const token = localStorage.getItem('token');
 
@@ -35,10 +37,47 @@ const Profile = () => {
                 address: data.address || '',
                 profilePicture: data.profilePicture || ''
             });
+
+            // Fetch notification preferences
+            const { data: prefData } = await api.get('/notifications/preferences', config);
+            setPreferences(prefData);
         } catch (error) {
             console.error(error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handlePreferenceChange = async (type, field, value) => {
+        try {
+            const config = { headers: { Authorization: `Bearer ${token}` } };
+
+            // Find current state
+            const current = preferences.find(p => p.notificationType === type) || {
+                inAppEnabled: true, emailEnabled: true
+            };
+
+            const payload = {
+                notificationType: type,
+                inAppEnabled: field === 'inAppEnabled' ? value : current.inAppEnabled,
+                emailEnabled: field === 'emailEnabled' ? value : current.emailEnabled
+            };
+
+            await api.put('/notifications/preferences', payload, config);
+            toast.success('Preference updated');
+
+            // Update local state
+            setPreferences(prev => {
+                const exists = prev.find(p => p.notificationType === type);
+                if (exists) {
+                    return prev.map(p => p.notificationType === type ? { ...p, [field]: value } : p);
+                } else {
+                    return [...prev, { ...payload, notificationType: type }];
+                }
+            });
+        } catch (error) {
+            toast.error('Failed to update preference');
+            console.error(error);
         }
     };
 
@@ -109,6 +148,12 @@ const Profile = () => {
                     className={`px-6 py-3 font-medium text-sm transition-colors border-b-2 ${activeTab === 'documents' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}
                 >
                     Documents
+                </button>
+                <button
+                    onClick={() => setActiveTab('notifications')}
+                    className={`px-6 py-3 font-medium text-sm transition-colors border-b-2 ${activeTab === 'notifications' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}
+                >
+                    Notifications
                 </button>
             </div>
 
@@ -181,6 +226,56 @@ const Profile = () => {
                                 <p>No documents uploaded.</p>
                             </div>
                         )}
+                    </div>
+                )}
+
+                {activeTab === 'notifications' && (
+                    <div>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2"><Bell className="w-5 h-5 text-purple-500" /> Notification Preferences</h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">Choose how you want to be notified about important updates.</p>
+
+                        <div className="space-y-4 max-w-2xl">
+                            {['LEAVE_UPDATE', 'PAYSLIP', 'ANNOUNCEMENT'].map((type) => {
+                                const pref = preferences.find(p => p.notificationType === type) || {
+                                    inAppEnabled: true, emailEnabled: true
+                                };
+
+                                const labels = {
+                                    'LEAVE_UPDATE': { title: 'Leave Updates', desc: 'When your leave request is approved or rejected' },
+                                    'PAYSLIP': { title: 'Payslip Generation', desc: 'When a new payslip is generated for you' },
+                                    'ANNOUNCEMENT': { title: 'Company Announcements', desc: 'When a new notice is published on the board' }
+                                };
+
+                                return (
+                                    <div key={type} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-100 dark:border-gray-700 gap-4">
+                                        <div>
+                                            <h4 className="font-medium text-gray-900 dark:text-white">{labels[type].title}</h4>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{labels[type].desc}</p>
+                                        </div>
+                                        <div className="flex items-center gap-6">
+                                            <label className="flex items-center gap-2 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={pref.inAppEnabled}
+                                                    onChange={(e) => handlePreferenceChange(type, 'inAppEnabled', e.target.checked)}
+                                                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600 cursor-pointer"
+                                                />
+                                                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">In-App</span>
+                                            </label>
+                                            <label className="flex items-center gap-2 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={pref.emailEnabled}
+                                                    onChange={(e) => handlePreferenceChange(type, 'emailEnabled', e.target.checked)}
+                                                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600 cursor-pointer"
+                                                />
+                                                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Email</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
                     </div>
                 )}
             </div>

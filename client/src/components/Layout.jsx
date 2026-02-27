@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Sidebar from './Sidebar';
+import NotificationBell from './NotificationBell';
 import { useAuth } from '../context/AuthContext';
 
 const Layout = ({ children }) => {
@@ -15,17 +16,21 @@ const Layout = ({ children }) => {
                         {/* Dynamic Title Implementation can go here */}
                         Overview
                     </h2>
-                    <Link to="/dashboard/profile" className="flex items-center gap-4 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-lg transition-colors cursor-pointer">
-                        <div className="flex flex-col items-end">
-                            <span className="text-sm font-medium text-gray-900 dark:text-white">
-                                {user?.firstName} {user?.lastName}
-                            </span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">{user?.role}</span>
-                        </div>
-                        <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-400 font-bold">
-                            {user?.firstName?.[0]}{user?.lastName?.[0]}
-                        </div>
-                    </Link>
+                    <div className="flex items-center">
+                        <NotificationBell />
+
+                        <Link to="/dashboard/profile" className="flex items-center gap-4 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-lg transition-colors cursor-pointer border-l pl-4 border-gray-200 dark:border-gray-700">
+                            <div className="flex flex-col items-end">
+                                <span className="text-sm font-medium text-gray-900 dark:text-white">
+                                    {user?.firstName} {user?.lastName}
+                                </span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">{user?.role}</span>
+                            </div>
+                            <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-400 font-bold">
+                                {user?.firstName?.[0]}{user?.lastName?.[0]}
+                            </div>
+                        </Link>
+                    </div>
                 </header>
                 <div className="p-8">
                     {children}

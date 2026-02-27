@@ -1,4 +1,5 @@
 const prisma = require('../config/prisma');
+const NotificationService = require('../services/NotificationService');
 
 // @desc    Apply for Leave
 // @route   POST /api/leaves
@@ -114,6 +115,11 @@ const updateLeaveStatus = async (req, res) => {
                 adminComments: adminComments || existingLeave.adminComments
             }
         });
+
+        // Trigger notification
+        if (status !== existingLeave.status) {
+            await NotificationService.notifyLeaveUpdate(updatedLeave, status);
+        }
 
         res.json({ ...updatedLeave, _id: updatedLeave.id });
     } catch (error) {

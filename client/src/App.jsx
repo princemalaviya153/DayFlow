@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
@@ -17,6 +18,7 @@ import Payroll from './pages/Payroll';
 import AdminPayroll from './pages/AdminPayroll';
 import Profile from './pages/Profile';
 import Noticeboard from './pages/Noticeboard';
+import Notifications from './pages/Notifications';
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
     const { user, loading } = useAuth();
@@ -38,6 +40,7 @@ function App() {
     return (
         <Router>
             <AuthProvider>
+                <Toaster position="top-right" />
                 <Routes>
                     <Route path="/login" element={<Login />} />
                     <Route path="/signup" element={<Signup />} />
@@ -124,6 +127,14 @@ function App() {
                         element={
                             <ProtectedRoute allowedRoles={['Employee', 'Admin']}>
                                 <Profile />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/dashboard/notifications"
+                        element={
+                            <ProtectedRoute allowedRoles={['Employee', 'Admin']}>
+                                <Notifications />
                             </ProtectedRoute>
                         }
                     />

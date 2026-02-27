@@ -1,4 +1,5 @@
 const prisma = require('../config/prisma');
+const NotificationService = require('../services/NotificationService');
 
 // @desc    Create new announcement
 // @route   POST /api/announcements
@@ -22,6 +23,27 @@ const createAnnouncement = async (req, res) => {
                 author: { select: { firstName: true, lastName: true } }
             }
         });
+
+        // Notify users
+        const whereClause = announcement.targetRole === 'All' ? {} : { role: announcement.targetRole };
+        const usersToNotify = await prisma.user.findMany({
+            where: {
+                ...whereClause,
+                id: { not: req.user.id } // Don't notify the author
+            },
+            select: { id: true }
+        });
+
+        for (const user of usersToNotify) {
+            await NotificationService.createNotification({
+                recipientId: user.id,
+                type: 'ANNOUNCEMENT',
+                title: `New Announcement: ${announcement.title}`,
+                message: announcement.category === 'Urgent' ? '⚠️ Urgent Update posted on the noticeboard.' : 'A new announcement has been posted on the noticeboard.',
+                actionUrl: '/noticeboard',
+                metadata: { announcementId: announcement.id }
+            });
+        }
 
         res.status(201).json(announcement);
     } catch (error) {

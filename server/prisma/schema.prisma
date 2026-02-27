@@ -34,6 +34,8 @@ model User {
   payrolls            Payroll[]
   authoredAnnouncements Announcement[] @relation("AuthoredAnnouncements")
   announcementReads   AnnouncementRead[]
+  notifications       Notification[]
+  notificationPrefs   NotificationPreference[]
 }
 
 model Attendance {
@@ -161,4 +163,40 @@ model AnnouncementRead {
   readAt         DateTime     @default(now())
 
   @@unique([announcementId, userId]) // Ensure a user can only have one read receipt per announcement
+}
+
+enum NotificationType {
+  LEAVE_UPDATE
+  PAYSLIP
+  BIRTHDAY
+  ANNIVERSARY
+  EXPENSE_UPDATE
+  REVIEW_DUE
+  TASK_ASSIGNED
+  ANNOUNCEMENT
+}
+
+model Notification {
+  id          String           @id @default(uuid())
+  recipientId String
+  recipient   User             @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+  type        NotificationType
+  title       String
+  message     String           @db.Text
+  isRead      Boolean          @default(false)
+  readAt      DateTime?
+  actionUrl   String?
+  metadata    Json?            // Stores arbitrary data like { leaveId: '123' }
+  createdAt   DateTime         @default(now())
+}
+
+model NotificationPreference {
+  id               String           @id @default(uuid())
+  employeeId       String
+  user             User             @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  notificationType NotificationType
+  inAppEnabled     Boolean          @default(true)
+  emailEnabled     Boolean          @default(true)
+
+  @@unique([employeeId, notificationType])
 }
