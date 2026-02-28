@@ -7,7 +7,7 @@ const Leave = () => {
     const [leaves, setLeaves] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [formData, setFormData] = useState({
-        leaveType: 'Sick Leave',
+        leaveType: 'Sick',
         startDate: '',
         endDate: '',
         reason: ''
@@ -38,7 +38,7 @@ const Leave = () => {
             await api.post('/leaves', formData, config);
             setShowModal(false);
             fetchLeaves();
-            setFormData({ leaveType: 'Sick Leave', startDate: '', endDate: '', reason: '' });
+            setFormData({ leaveType: 'Sick', startDate: '', endDate: '', reason: '' });
         } catch (error) {
             setError(error.response?.data?.message || 'Failed to submit leave request');
         }
@@ -109,9 +109,9 @@ const Leave = () => {
                                     value={formData.leaveType}
                                     onChange={(e) => setFormData({ ...formData, leaveType: e.target.value })}
                                 >
-                                    <option className="bg-white dark:bg-gray-700">Paid</option>
-                                    <option className="bg-white dark:bg-gray-700">Sick</option>
-                                    <option className="bg-white dark:bg-gray-700">Unpaid</option>
+                                    <option value="Paid" className="bg-white dark:bg-gray-700">Paid</option>
+                                    <option value="Sick" className="bg-white dark:bg-gray-700">Sick</option>
+                                    <option value="Unpaid" className="bg-white dark:bg-gray-700">Unpaid</option>
                                 </select>
                             </div>
                             <div className="grid grid-cols-2 gap-4">

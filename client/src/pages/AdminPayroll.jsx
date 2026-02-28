@@ -8,20 +8,33 @@ import { generatePayslipPDF } from '../utils/payslipGenerator';
 
 const AdminPayroll = () => {
     const [payrolls, setPayrolls] = useState([]);
+    const [employees, setEmployees] = useState([]);
     const [showModal, setShowModal] = useState(false);
 
     useEffect(() => {
         fetchPayrolls();
+        fetchEmployees();
     }, []);
 
     const fetchPayrolls = async () => {
         try {
             const token = localStorage.getItem('token');
             const config = { headers: { Authorization: `Bearer ${token}` } };
-            const { data } = await api.get('/payroll/all', config); 
+            const { data } = await api.get('/payroll/all', config);
             setPayrolls(data);
         } catch (error) {
             console.error("Error fetching payrolls", error);
+        }
+    };
+
+    const fetchEmployees = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const config = { headers: { Authorization: `Bearer ${token}` } };
+            const { data } = await api.get('/employees', config);
+            setEmployees(data);
+        } catch (error) {
+            console.error("Error fetching employees", error);
         }
     };
 
@@ -29,7 +42,7 @@ const AdminPayroll = () => {
         e.preventDefault();
         const formData = new FormData(e.target);
         const payload = Object.fromEntries(formData);
-        
+
         try {
             const token = localStorage.getItem('token');
             const config = { headers: { Authorization: `Bearer ${token}` } };
@@ -72,7 +85,7 @@ const AdminPayroll = () => {
         <Layout>
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Employee Payroll</h1>
-                <button 
+                <button
                     onClick={() => setShowModal(true)}
                     className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                 >
@@ -84,7 +97,7 @@ const AdminPayroll = () => {
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
-                         <thead className="bg-gray-50 dark:bg-gray-700/50 text-gray-600 dark:text-gray-400 text-xs uppercase font-semibold">
+                        <thead className="bg-gray-50 dark:bg-gray-700/50 text-gray-600 dark:text-gray-400 text-xs uppercase font-semibold">
                             <tr>
                                 <th className="px-6 py-4">Employee</th>
                                 <th className="px-6 py-4">Month</th>
@@ -96,8 +109,8 @@ const AdminPayroll = () => {
                                 <th className="px-6 py-4 text-right">Actions</th>
                             </tr>
                         </thead>
-                         <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                             {payrolls.map((payroll) => (
+                        <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                            {payrolls.map((payroll) => (
                                 <tr key={payroll._id}>
                                     <td className="px-6 py-4">
                                         <div className="font-medium text-gray-900 dark:text-white">{payroll.user?.firstName} {payroll.user?.lastName}</div>
@@ -116,7 +129,7 @@ const AdminPayroll = () => {
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-2">
                                             {payroll.status === 'Pending' && (
-                                                <button 
+                                                <button
                                                     onClick={() => updateStatus(payroll._id, 'Paid')}
                                                     className="text-xs px-2 py-1 bg-green-50 text-green-600 rounded border border-green-200 hover:bg-green-100 transition-colors"
                                                     title="Mark as Paid"
@@ -124,14 +137,14 @@ const AdminPayroll = () => {
                                                     Mark Paid
                                                 </button>
                                             )}
-                                            <button 
+                                            <button
                                                 onClick={() => deletePayroll(payroll._id)}
                                                 className="text-red-500 hover:text-red-700 transition-colors p-1"
                                                 title="Delete Record"
                                             >
                                                 <Trash2 className="w-4 h-4" />
                                             </button>
-                                            <button 
+                                            <button
                                                 onClick={() => generatePayslipPDF(payroll)}
                                                 className="text-blue-500 hover:text-blue-700 transition-colors p-1"
                                                 title="Download PDF"
@@ -141,8 +154,8 @@ const AdminPayroll = () => {
                                         </div>
                                     </td>
                                 </tr>
-                             ))}
-                         </tbody>
+                            ))}
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -153,8 +166,19 @@ const AdminPayroll = () => {
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Generate Payslip</h3>
                         <form onSubmit={handleRunPayroll} className="space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Employee ID</label>
-                                <input name="employeeId" required className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Employee</label>
+                                <select
+                                    name="employeeId"
+                                    required
+                                    className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                                    <option value="">Select Employee</option>
+                                    {employees.map(emp => (
+                                        <option key={emp._id} value={emp.employeeId}>
+                                            {emp.firstName} {emp.lastName} ({emp.employeeId})
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Month (e.g. Jan 2026)</label>
