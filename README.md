@@ -26,7 +26,7 @@ Dayflow is a comprehensive Human Resource Management System (HRMS) designed for 
 
 - **Frontend**: React (Vite), Tailwind CSS, Lucide React (Icons), Axios
 - **Backend**: Node.js, Express.js
-- **Database**: MongoDB (Mongoose)
+- **Database**: PostgreSQL (Supabase) via Prisma ORM
 
 ## Setup Instructions
 
@@ -49,13 +49,17 @@ Dayflow is a comprehensive Human Resource Management System (HRMS) designed for 
     
     # Create .env file
     # PORT=5000
-    # MONGO_URI=mongodb://localhost:27017/dayflow
+    # DATABASE_URL="postgresql://user:password@host:5432/dbname?pgbouncer=true&connection_limit=1"
+    # DIRECT_URL="postgresql://user:password@host:5432/dbname"
     # JWT_SECRET=your_secret_key
     # EMAIL_HOST=smtp.gmail.com (Optional for Forgot Password)
     # EMAIL_PORT=587
     # EMAIL_USER=your_email@gmail.com
     # EMAIL_PASS=your_app_password
     
+    # Push database schema to Supabase
+    npx prisma db push
+
     # Seed Database (Admin: admin@dayflow.com / admin123)
     npm run seed
     
