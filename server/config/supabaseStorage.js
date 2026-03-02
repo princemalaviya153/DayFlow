@@ -46,4 +46,31 @@ const uploadToSupabase = async (fileBuffer, fileName, mimeType) => {
     return urlData.publicUrl;
 };
 
-module.exports = { uploadToSupabase };
+/**
+ * Delete a file from Supabase Storage.
+ * @param {string} publicUrl - The full public URL of the file to delete
+ */
+const deleteFromSupabase = async (publicUrl) => {
+    if (!supabase) {
+        throw new Error('Supabase Storage is not configured.');
+    }
+
+    // Extract the file path from the public URL
+    // URL format: https://<ref>.supabase.co/storage/v1/object/public/avatars/profiles/avatar-123.jpg
+    const marker = `/storage/v1/object/public/${BUCKET_NAME}/`;
+    const idx = publicUrl.indexOf(marker);
+    if (idx === -1) {
+        throw new Error('Invalid Supabase storage URL');
+    }
+    const filePath = publicUrl.substring(idx + marker.length);
+
+    const { error } = await supabase.storage
+        .from(BUCKET_NAME)
+        .remove([filePath]);
+
+    if (error) {
+        throw new Error(`Supabase delete failed: ${error.message}`);
+    }
+};
+
+module.exports = { uploadToSupabase, deleteFromSupabase };

@@ -44,7 +44,7 @@ const updateUserProfile = async (req, res) => {
         if (req.body.gender) dataToUpdate.gender = req.body.gender;
         if (req.body.address) dataToUpdate.address = req.body.address;
         if (req.body.phone) dataToUpdate.phone = req.body.phone;
-        if (req.body.profilePicture) dataToUpdate.profilePicture = req.body.profilePicture;
+        if ('profilePicture' in req.body) dataToUpdate.profilePicture = req.body.profilePicture || null;
 
         if (req.body.password) {
             const salt = await bcrypt.genSalt(10);

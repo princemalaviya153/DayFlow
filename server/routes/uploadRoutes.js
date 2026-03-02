@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const upload = require('../middleware/uploadMiddleware');
-const { uploadToSupabase } = require('../config/supabaseStorage');
+const { uploadToSupabase, deleteFromSupabase } = require('../config/supabaseStorage');
 
 router.post('/', upload.single('image'), async (req, res) => {
     try {
@@ -20,6 +20,21 @@ router.post('/', upload.single('image'), async (req, res) => {
     } catch (err) {
         console.error('[Upload Error]', err.message);
         res.status(500).json({ message: err.message || 'Error uploading file' });
+    }
+});
+
+router.delete('/', async (req, res) => {
+    try {
+        const { url } = req.body;
+        if (!url) {
+            return res.status(400).json({ message: 'No file URL provided' });
+        }
+
+        await deleteFromSupabase(url);
+        res.json({ message: 'File deleted successfully' });
+    } catch (err) {
+        console.error('[Delete Error]', err.message);
+        res.status(500).json({ message: err.message || 'Error deleting file' });
     }
 });
 
