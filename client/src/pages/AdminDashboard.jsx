@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
-import { useAuth } from '../context/AuthContext';
+
 import Layout from '../components/Layout';
 import { Megaphone, AlertCircle, Users, Calendar, Briefcase, DollarSign } from 'lucide-react';
 
@@ -21,7 +21,7 @@ const StatCard = ({ title, value, icon: Icon, color }) => (
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
-    const { user } = useAuth();
+
     const [summary, setSummary] = useState({
         totalEmployees: 0,
         presentToday: 0,

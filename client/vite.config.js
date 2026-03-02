@@ -18,9 +18,6 @@ export default defineConfig({
             if (id.includes('jspdf')) {
               return 'vendor-jspdf';
             }
-            if (id.includes('html2canvas')) {
-              return 'vendor-html2canvas';
-            }
             if (id.includes('lucide-react')) {
               return 'vendor-icons';
             }

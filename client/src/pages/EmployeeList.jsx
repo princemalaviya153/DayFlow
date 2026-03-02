@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import api from '../utils/api';
-import { Search, UserPlus, MoreVertical, Edit, Trash, Plus } from 'lucide-react';
+import { Search, Plus } from 'lucide-react';
 import AddEmployeeModal from '../components/AddEmployeeModal';
 
 const EmployeeList = () => {
@@ -38,7 +38,7 @@ const EmployeeList = () => {
         <Layout>
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Employees</h1>
-                <button 
+                <button
                     onClick={handleAdd}
                     className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-200 dark:shadow-none transition-all"
                 >
@@ -47,10 +47,10 @@ const EmployeeList = () => {
                 </button>
             </div>
 
-            <AddEmployeeModal 
-                isOpen={showModal} 
-                onClose={() => setShowModal(false)} 
-                onAdd={fetchEmployees} 
+            <AddEmployeeModal
+                isOpen={showModal}
+                onClose={() => setShowModal(false)}
+                onAdd={fetchEmployees}
                 initialData={selectedEmployee}
             />
 
@@ -58,9 +58,9 @@ const EmployeeList = () => {
                 <div className="p-4 border-b border-gray-200 dark:border-gray-700">
                     <div className="relative max-w-sm">
                         <Search className="w-5 h-5 absolute left-3 top-2.5 text-gray-400" />
-                        <input 
-                            type="text" 
-                            placeholder="Search employees..." 
+                        <input
+                            type="text"
+                            placeholder="Search employees..."
                             className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                     </div>
@@ -97,7 +97,7 @@ const EmployeeList = () => {
                                     <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{emp.designation || '-'}</td>
                                     <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{emp.department || '-'}</td>
                                     <td className="px-6 py-4 text-right">
-                                        <button 
+                                        <button
                                             onClick={() => handleEdit(emp)}
                                             className="text-blue-600 hover:text-blue-800 text-sm font-medium mr-2"
                                         >

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import api from '../utils/api';
-import { MapPin, Clock, LogIn, LogOut, Calendar, CheckCircle } from 'lucide-react';
+import { Clock, CheckCircle } from 'lucide-react';
 
 const Attendance = () => {
     const [attendance, setAttendance] = useState(null);

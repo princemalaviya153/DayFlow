@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import api from '../utils/api';
-import { Check, X, Clock } from 'lucide-react';
+import { Check, X } from 'lucide-react';
 
 const AdminLeave = () => {
     const [leaves, setLeaves] = useState([]);
@@ -44,7 +44,7 @@ const AdminLeave = () => {
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
                         <thead className="bg-gray-50 dark:bg-gray-700/50 text-gray-600 dark:text-gray-400 text-xs uppercase font-semibold">
-                             <tr>
+                            <tr>
                                 <th className="px-6 py-4">Employee</th>
                                 <th className="px-6 py-4">Dates</th>
                                 <th className="px-6 py-4">Reason</th>
@@ -52,7 +52,7 @@ const AdminLeave = () => {
                                 <th className="px-6 py-4 text-right">Actions</th>
                             </tr>
                         </thead>
-                         <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                        <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                             {leaves.map((leave) => (
                                 <tr key={leave._id}>
                                     <td className="px-6 py-4">
@@ -65,9 +65,9 @@ const AdminLeave = () => {
                                     <td className="px-6 py-4 text-gray-600 dark:text-gray-300 text-sm max-w-xs truncate">{leave.reason}</td>
                                     <td className="px-6 py-4">
                                         <span className={`px-2 py-1 text-xs font-medium rounded-full 
-                                            ${leave.status === 'Pending' ? 'bg-yellow-100 text-yellow-700' : 
-                                              leave.status === 'Approved' ? 'bg-green-100 text-green-700' : 
-                                              'bg-red-100 text-red-700'}`}>
+                                            ${leave.status === 'Pending' ? 'bg-yellow-100 text-yellow-700' :
+                                                leave.status === 'Approved' ? 'bg-green-100 text-green-700' :
+                                                    'bg-red-100 text-red-700'}`}>
                                             {leave.status}
                                         </span>
                                     </td>
@@ -85,7 +85,7 @@ const AdminLeave = () => {
                                     </td>
                                 </tr>
                             ))}
-                         </tbody>
+                        </tbody>
                     </table>
                 </div>
             </div>

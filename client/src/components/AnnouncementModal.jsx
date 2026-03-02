@@ -47,9 +47,7 @@ const AnnouncementModal = ({ isOpen, onClose, onRefresh, existingData = null }) 
         }));
     };
 
-    const handleContentChange = (content) => {
-        setFormData(prev => ({ ...prev, content }));
-    };
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -80,14 +78,7 @@ const AnnouncementModal = ({ isOpen, onClose, onRefresh, existingData = null }) 
 
     if (!isOpen) return null;
 
-    const modules = {
-        toolbar: [
-            [{ 'header': [1, 2, false] }],
-            ['bold', 'italic', 'underline', 'strike'],
-            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-            ['link', 'clean']
-        ],
-    };
+
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">

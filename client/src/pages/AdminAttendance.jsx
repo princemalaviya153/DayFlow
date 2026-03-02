@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import api from '../utils/api';
-import { Calendar as CalendarIcon, User, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 
 const AdminAttendance = () => {
     const [attendanceData, setAttendanceData] = useState([]);

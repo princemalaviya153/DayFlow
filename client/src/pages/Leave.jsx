@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import api from '../utils/api';
-import { Clock, Plus, CheckCircle, XCircle, AlertCircle, X } from 'lucide-react';
+import { Plus, X } from 'lucide-react';
 
 const Leave = () => {
     const [leaves, setLeaves] = useState([]);

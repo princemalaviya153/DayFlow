@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
-import axios from 'axios';
 import api from '../utils/api';
-import { User, Mail, Phone, MapPin, Briefcase, Calendar, Camera, Upload, Edit, FileText, DollarSign, Bell } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Briefcase, Edit, FileText, DollarSign, Bell } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 

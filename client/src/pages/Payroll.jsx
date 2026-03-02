@@ -1,16 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import api from '../utils/api';
-import { DollarSign, Download, Calendar } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import { Download } from 'lucide-react';
 import { generatePayslipPDF } from '../utils/payslipGenerator';
 
 const Payroll = () => {
     const [payrolls, setPayrolls] = useState([]);
     const [loading, setLoading] = useState(true);
-    const { user } = useAuth();
+
 
     useEffect(() => {
         const fetchPayroll = async () => {
@@ -47,7 +44,7 @@ const Payroll = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                             {payrolls.map((payroll) => (
+                            {payrolls.map((payroll) => (
                                 <tr key={payroll._id}>
                                     <td className="px-6 py-4 text-gray-900 dark:text-white font-medium">{payroll.month}</td>
                                     <td className="px-6 py-4 text-gray-600 dark:text-gray-300 transition-colors">${payroll.basicSalary}</td>
@@ -60,7 +57,7 @@ const Payroll = () => {
                                         </span>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <button 
+                                        <button
                                             onClick={() => generatePayslipPDF(payroll)}
                                             className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 flex items-center gap-1 text-sm font-medium"
                                         >
@@ -68,7 +65,7 @@ const Payroll = () => {
                                         </button>
                                     </td>
                                 </tr>
-                             ))}
+                            ))}
                         </tbody>
                     </table>
                 </div>

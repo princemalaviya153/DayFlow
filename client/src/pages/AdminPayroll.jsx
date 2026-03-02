@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import api from '../utils/api';
-import { DollarSign, Check, X, Download, Plus, Trash2 } from 'lucide-react';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import { Download, Plus, Trash2 } from 'lucide-react';
 import { generatePayslipPDF } from '../utils/payslipGenerator';
 
 const AdminPayroll = () => {
