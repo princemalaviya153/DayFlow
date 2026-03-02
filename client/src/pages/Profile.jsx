@@ -98,7 +98,7 @@ const Profile = () => {
 
     return (
         <Layout>
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-white">My Profile</h1>
                 <button
                     onClick={() => setShowEditModal(true)}
@@ -110,73 +110,74 @@ const Profile = () => {
             </div>
 
             {/* Header Card */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 mb-6 flex flex-col md:flex-row items-center gap-6">
-                <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden border-4 border-white dark:border-gray-700 shadow-lg">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 sm:p-6 mb-6 flex flex-col md:flex-row items-center gap-4 sm:gap-6">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden border-4 border-white dark:border-gray-700 shadow-lg flex-shrink-0">
                     {profile.profilePicture ? (
                         <img src={profile.profilePicture} alt="Profile" className="w-full h-full object-cover" />
                     ) : (
-                        <User className="w-12 h-12 text-gray-400" />
+                        <User className="w-10 h-10 sm:w-12 sm:h-12 text-gray-400" />
                     )}
                 </div>
-                <div className="text-center md:text-left flex-1">
-                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{profile.firstName} {profile.lastName}</h2>
-                    <p className="text-gray-500 dark:text-gray-400 font-medium">{profile.designation || 'Employee'} • {profile.department || 'General'}</p>
-                    <div className="flex flex-wrap justify-center md:justify-start gap-4 mt-3 text-sm text-gray-600 dark:text-gray-300">
-                        <div className="flex items-center gap-1"><Mail className="w-4 h-4" /> {profile.email}</div>
-                        <div className="flex items-center gap-1"><Phone className="w-4 h-4" /> {profile.phone || 'N/A'}</div>
-                        <div className="flex items-center gap-1"><MapPin className="w-4 h-4" /> {profile.address || 'N/A'}</div>
+                <div className="text-center md:text-left flex-1 min-w-0">
+                    <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white truncate">{profile.firstName} {profile.lastName}</h2>
+                    <p className="text-gray-500 dark:text-gray-400 font-medium text-sm sm:text-base">{profile.designation || 'Employee'} • {profile.department || 'General'}</p>
+                    <div className="flex flex-col sm:flex-row flex-wrap justify-center md:justify-start gap-2 sm:gap-4 mt-3 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+                        <div className="flex items-center gap-1 truncate"><Mail className="w-4 h-4 flex-shrink-0" /> <span className="truncate">{profile.email}</span></div>
+                        <div className="flex items-center gap-1"><Phone className="w-4 h-4 flex-shrink-0" /> {profile.phone || 'N/A'}</div>
+                        <div className="flex items-center gap-1"><MapPin className="w-4 h-4 flex-shrink-0" /> {profile.address || 'N/A'}</div>
                     </div>
                 </div>
             </div>
 
             {/* Navigation Tabs */}
-            <div className="flex border-b border-gray-200 dark:border-gray-700 mb-6">
+            {/* Scrollable tabs on mobile */}
+            <div className="flex overflow-x-auto border-b border-gray-200 dark:border-gray-700 mb-6 -mx-4 px-4 sm:mx-0 sm:px-0">
                 <button
                     onClick={() => setActiveTab('overview')}
-                    className={`px-6 py-3 font-medium text-sm transition-colors border-b-2 ${activeTab === 'overview' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}
+                    className={`px-4 sm:px-6 py-3 font-medium text-sm transition-colors border-b-2 whitespace-nowrap ${activeTab === 'overview' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}
                 >
                     Overview
                 </button>
                 <button
                     onClick={() => setActiveTab('salary')}
-                    className={`px-6 py-3 font-medium text-sm transition-colors border-b-2 ${activeTab === 'salary' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}
+                    className={`px-4 sm:px-6 py-3 font-medium text-sm transition-colors border-b-2 whitespace-nowrap ${activeTab === 'salary' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}
                 >
-                    Salary Structure
+                    Salary
                 </button>
                 <button
                     onClick={() => setActiveTab('documents')}
-                    className={`px-6 py-3 font-medium text-sm transition-colors border-b-2 ${activeTab === 'documents' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}
+                    className={`px-4 sm:px-6 py-3 font-medium text-sm transition-colors border-b-2 whitespace-nowrap ${activeTab === 'documents' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}
                 >
                     Documents
                 </button>
                 <button
                     onClick={() => setActiveTab('notifications')}
-                    className={`px-6 py-3 font-medium text-sm transition-colors border-b-2 ${activeTab === 'notifications' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}
+                    className={`px-4 sm:px-6 py-3 font-medium text-sm transition-colors border-b-2 whitespace-nowrap ${activeTab === 'notifications' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}
                 >
                     Notifications
                 </button>
             </div>
 
             {/* Content Area */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 min-h-[300px]">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 sm:p-6 min-h-[300px]">
                 {activeTab === 'overview' && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div>
                             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2"><User className="w-5 h-5 text-blue-500" /> Personal Details</h3>
                             <div className="space-y-3">
-                                <div className="grid grid-cols-3 text-sm"><span className="text-gray-500">Full Name</span> <span className="col-span-2 text-gray-900 dark:text-white font-medium">{profile.firstName} {profile.lastName}</span></div>
-                                <div className="grid grid-cols-3 text-sm"><span className="text-gray-500">Date of Birth</span> <span className="col-span-2 text-gray-900 dark:text-white font-medium">{profile.dob ? new Date(profile.dob).toLocaleDateString() : '-'}</span></div>
-                                <div className="grid grid-cols-3 text-sm"><span className="text-gray-500">Gender</span> <span className="col-span-2 text-gray-900 dark:text-white font-medium">{profile.gender || '-'}</span></div>
-                                <div className="grid grid-cols-3 text-sm"><span className="text-gray-500">Address</span> <span className="col-span-2 text-gray-900 dark:text-white font-medium">{profile.address || '-'}</span></div>
+                                <div className="flex flex-col sm:grid sm:grid-cols-3 text-sm"><span className="text-gray-500">Full Name</span> <span className="sm:col-span-2 text-gray-900 dark:text-white font-medium">{profile.firstName} {profile.lastName}</span></div>
+                                <div className="flex flex-col sm:grid sm:grid-cols-3 text-sm"><span className="text-gray-500">Date of Birth</span> <span className="sm:col-span-2 text-gray-900 dark:text-white font-medium">{profile.dob ? new Date(profile.dob).toLocaleDateString() : '-'}</span></div>
+                                <div className="flex flex-col sm:grid sm:grid-cols-3 text-sm"><span className="text-gray-500">Gender</span> <span className="sm:col-span-2 text-gray-900 dark:text-white font-medium">{profile.gender || '-'}</span></div>
+                                <div className="flex flex-col sm:grid sm:grid-cols-3 text-sm"><span className="text-gray-500">Address</span> <span className="sm:col-span-2 text-gray-900 dark:text-white font-medium">{profile.address || '-'}</span></div>
                             </div>
                         </div>
                         <div>
                             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2"><Briefcase className="w-5 h-5 text-blue-500" /> Job Details</h3>
                             <div className="space-y-3">
-                                <div className="grid grid-cols-3 text-sm"><span className="text-gray-500">Employee ID</span> <span className="col-span-2 text-gray-900 dark:text-white font-medium">{profile.employeeId}</span></div>
-                                <div className="grid grid-cols-3 text-sm"><span className="text-gray-500">Department</span> <span className="col-span-2 text-gray-900 dark:text-white font-medium">{profile.department}</span></div>
-                                <div className="grid grid-cols-3 text-sm"><span className="text-gray-500">Designation</span> <span className="col-span-2 text-gray-900 dark:text-white font-medium">{profile.designation}</span></div>
-                                <div className="grid grid-cols-3 text-sm"><span className="text-gray-500">Joining Date</span> <span className="col-span-2 text-gray-900 dark:text-white font-medium">{new Date(profile.joinedDate).toLocaleDateString()}</span></div>
+                                <div className="flex flex-col sm:grid sm:grid-cols-3 text-sm"><span className="text-gray-500">Employee ID</span> <span className="sm:col-span-2 text-gray-900 dark:text-white font-medium">{profile.employeeId}</span></div>
+                                <div className="flex flex-col sm:grid sm:grid-cols-3 text-sm"><span className="text-gray-500">Department</span> <span className="sm:col-span-2 text-gray-900 dark:text-white font-medium">{profile.department}</span></div>
+                                <div className="flex flex-col sm:grid sm:grid-cols-3 text-sm"><span className="text-gray-500">Designation</span> <span className="sm:col-span-2 text-gray-900 dark:text-white font-medium">{profile.designation}</span></div>
+                                <div className="flex flex-col sm:grid sm:grid-cols-3 text-sm"><span className="text-gray-500">Joining Date</span> <span className="sm:col-span-2 text-gray-900 dark:text-white font-medium">{new Date(profile.joinedDate).toLocaleDateString()}</span></div>
                             </div>
                         </div>
                     </div>
@@ -282,8 +283,8 @@ const Profile = () => {
 
             {/* Edit Modal */}
             {showEditModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-2xl p-6 overflow-y-auto max-h-[90vh]">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-2xl p-4 sm:p-6 overflow-y-auto max-h-[90vh]">
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Edit Profile</h3>
                         <form onSubmit={handleUpdate} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>

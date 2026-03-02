@@ -36,7 +36,7 @@ const Login = () => {
                     <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dayflow</h1>
                     <p className="mt-2 text-gray-500 dark:text-gray-400">Sign in to your account</p>
                 </div>
-                
+
                 {error && (
                     <div className="p-3 text-sm text-red-600 bg-red-100 rounded-lg dark:bg-red-900/30 dark:text-red-400">
                         {error}
@@ -79,8 +79,8 @@ const Login = () => {
                     </div>
 
                     <div className="flex items-center justify-between mb-4">
-                         <label className="flex items-center text-sm text-gray-600">
-                           {/* Remember me checkbox could go here */}
+                        <label className="flex items-center text-sm text-gray-600">
+                            {/* Remember me checkbox could go here */}
                         </label>
                         <Link to="/forgot-password" className="text-sm text-teal-600 hover:text-teal-500">
                             Forgot your password?
