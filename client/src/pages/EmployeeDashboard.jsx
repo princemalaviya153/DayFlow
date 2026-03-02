@@ -9,27 +9,52 @@ const EmployeeDashboard = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
     const [latestAnnouncements, setLatestAnnouncements] = React.useState([]);
+    const [todayStatus, setTodayStatus] = React.useState(null);
 
     React.useEffect(() => {
-        const fetchAnnouncements = async () => {
+        const fetchDashboardData = async () => {
             try {
                 const token = localStorage.getItem('token');
                 const config = { headers: { Authorization: `Bearer ${token}` } };
-                const { data } = await api.get('/announcements', config);
-                setLatestAnnouncements(data.slice(0, 3));
+
+                // Fetch announcements
+                const { data: announcements } = await api.get('/announcements', config);
+                setLatestAnnouncements(announcements.slice(0, 3));
+
+                // Fetch today's attendance status
+                const { data: attendanceData } = await api.get('/attendance', config);
+                const todayLocal = new Date().toLocaleDateString();
+                const todayRecord = attendanceData.find(
+                    record => new Date(record.date).toLocaleDateString() === todayLocal
+                );
+                setTodayStatus(todayRecord?.status || null);
             } catch (err) {
                 console.error(err);
             }
         };
-        fetchAnnouncements();
+        fetchDashboardData();
     }, []);
+
+    const getStatusLabel = (status) => {
+        if (!status) return { text: 'Not Checked In', color: 'text-gray-500' };
+        if (status === 'Present') return { text: 'Present', color: 'text-green-500' };
+        if (status === 'Late') return { text: 'Late', color: 'text-amber-500' };
+        if (status === 'Absent') return { text: 'Absent', color: 'text-red-500' };
+        if (status === 'Half_day') return { text: 'Half-day', color: 'text-orange-500' };
+        if (status === 'Leave') return { text: 'On Leave', color: 'text-blue-500' };
+        return { text: status, color: 'text-gray-500' };
+    };
+
+    const statusInfo = getStatusLabel(todayStatus);
 
     return (
         <Layout>
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8 flex items-center justify-between">
                 <div>
-                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Good Morning, {user?.firstName}!</h2>
-                    <p className="text-gray-500 dark:text-gray-400 mt-1">You are marked as <span className="text-green-600 font-medium">Present</span> today.</p>
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Good Morning, {user?.firstName || ''}!</h2>
+                    <p className="text-gray-500 dark:text-gray-400 mt-1">
+                        You are marked as <span className={`${statusInfo.color} font-medium`}>{statusInfo.text}</span> today.
+                    </p>
                 </div>
                 <div className="text-right">
                     <p className="text-3xl font-mono font-bold text-gray-900 dark:text-white">
