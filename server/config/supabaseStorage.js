@@ -4,11 +4,13 @@ require('dotenv').config();
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
+let supabase = null;
+
 if (!supabaseUrl || !supabaseServiceKey) {
     console.warn('[Supabase Storage] Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY. File uploads will fail.');
+} else {
+    supabase = createClient(supabaseUrl, supabaseServiceKey);
 }
-
-const supabase = createClient(supabaseUrl || '', supabaseServiceKey || '');
 
 const BUCKET_NAME = 'avatars';
 
@@ -20,6 +22,9 @@ const BUCKET_NAME = 'avatars';
  * @returns {Promise<string>} The public URL of the uploaded file
  */
 const uploadToSupabase = async (fileBuffer, fileName, mimeType) => {
+    if (!supabase) {
+        throw new Error('Supabase Storage is not configured. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY environment variables.');
+    }
     const filePath = `profiles/${fileName}`;
 
     const { data, error } = await supabase.storage
