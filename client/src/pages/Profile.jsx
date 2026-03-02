@@ -388,12 +388,8 @@ const Profile = () => {
                                                             };
                                                             const { data } = await api.post('/upload', uploadData, config);
 
-                                                            // data is the file path e.g. /uploads/image-123.jpg
-                                                            // We need to construct full URL for display if it's absolute, or if it's relative
-                                                            // Ideally the backend returns partial path.
-
-                                                            const fullUrl = `${import.meta.env.VITE_API_URL.replace('/api', '')}${data}`;
-                                                            setFormData(prev => ({ ...prev, profilePicture: fullUrl }));
+                                                            // Backend returns { url: 'https://...supabase.co/...' }
+                                                            setFormData(prev => ({ ...prev, profilePicture: data.url }));
 
                                                         } catch (error) {
                                                             console.error("Upload failed", error);

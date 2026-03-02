@@ -22,7 +22,6 @@ const uploadRoutes = require('./routes/uploadRoutes');
 const announcementRoutes = require('./routes/announcementRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const initCronJobs = require('./jobs/cronJobs');
-const path = require('path');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/employees', employeeRoutes);
@@ -34,8 +33,6 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/announcements', announcementRoutes);
 app.use('/api/notifications', notificationRoutes);
-
-app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
 
 // Initialize Cron Jobs
 initCronJobs();

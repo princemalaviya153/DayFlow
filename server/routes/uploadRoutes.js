@@ -1,15 +1,25 @@
 const express = require('express');
 const router = express.Router();
 const upload = require('../middleware/uploadMiddleware');
+const { uploadToSupabase } = require('../config/supabaseStorage');
 
-router.post('/', upload.single('image'), (req, res) => {
+router.post('/', upload.single('image'), async (req, res) => {
     try {
         if (!req.file) {
-           return res.status(400).send('No file uploaded');
+            return res.status(400).json({ message: 'No file uploaded' });
         }
-        res.send(`/${req.file.path.replace(/\\/g, '/')}`);
+
+        // Generate a unique filename
+        const ext = req.file.originalname.split('.').pop();
+        const fileName = `avatar-${Date.now()}.${ext}`;
+
+        // Upload to Supabase Storage and get the public URL
+        const publicUrl = await uploadToSupabase(req.file.buffer, fileName, req.file.mimetype);
+
+        res.json({ url: publicUrl });
     } catch (err) {
-        res.status(400).send('Error uploading file');
+        console.error('[Upload Error]', err.message);
+        res.status(500).json({ message: err.message || 'Error uploading file' });
     }
 });
 
