@@ -46,6 +46,7 @@ model Attendance {
   checkIn     DateTime?
   checkOut    DateTime?
   status      AttendanceStatus @default(Absent)
+  isLate      Boolean          @default(false)
   workHours   Float            @default(0)
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
@@ -95,6 +96,7 @@ enum AttendanceStatus {
   Present
   Absent
   Half_day @map("Half-day")
+  Late
   Leave
 }
 

@@ -9,7 +9,7 @@ const checkIn = async (req, res) => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
-        // Check if already checked in today
+        // Check if a record already exists for today
         const existingAttendance = await prisma.attendance.findFirst({
             where: {
                 userId: userId,
@@ -20,18 +20,47 @@ const checkIn = async (req, res) => {
             }
         });
 
-        if (existingAttendance) {
+        // If already genuinely checked in (has a checkIn timestamp), block
+        if (existingAttendance && existingAttendance.checkIn) {
             return res.status(400).json({ message: 'Already checked in today' });
         }
 
-        const attendance = await prisma.attendance.create({
-            data: {
-                userId,
-                date: today,
-                checkIn: new Date(),
-                status: 'Present' // from enum
-            }
-        });
+        const now = new Date();
+
+        // Late marking: shift starts at 9:30 AM, grace period of 10 mins
+        // So if check-in is after 9:40 AM → mark as Late
+        const shiftStart = new Date(today);
+        shiftStart.setHours(9, 30, 0, 0); // 9:30 AM
+        const graceMinutes = 10;
+        const lateThreshold = new Date(shiftStart.getTime() + graceMinutes * 60 * 1000); // 9:40 AM
+
+        const isLate = now > lateThreshold;
+        const status = isLate ? 'Late' : 'Present';
+
+        let attendance;
+
+        if (existingAttendance) {
+            // An Absent record was created by the daily cron — update it
+            attendance = await prisma.attendance.update({
+                where: { id: existingAttendance.id },
+                data: {
+                    checkIn: now,
+                    status,
+                    isLate
+                }
+            });
+        } else {
+            // No record yet — create a new one
+            attendance = await prisma.attendance.create({
+                data: {
+                    userId,
+                    date: today,
+                    checkIn: now,
+                    status,
+                    isLate
+                }
+            });
+        }
 
         res.status(201).json(attendance);
     } catch (error) {

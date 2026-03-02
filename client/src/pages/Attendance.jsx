@@ -8,20 +8,18 @@ const Attendance = () => {
     const [history, setHistory] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    // Helper to get today's date string YYYY-MM-DD
-    const today = new Date().toISOString().split('T')[0];
+    // Helper to get today's local date string for comparison
+    const todayLocal = new Date().toLocaleDateString();
 
     const fetchAttendance = async () => {
         try {
             const token = localStorage.getItem('token');
             const config = { headers: { Authorization: `Bearer ${token}` } };
             const { data } = await api.get('/attendance', config);
-            // data matches the schema: may be an array or single object? 
-            // The controller `attendanceController.js` getAttendance returns `find({ user: req.user.id })` which is an array
             setHistory(data);
 
-            // Check if there is a record for today
-            const todayRecord = data.find(record => new Date(record.date).toISOString().split('T')[0] === today);
+            // Check if there is a record for today (compare using local dates, not UTC)
+            const todayRecord = data.find(record => new Date(record.date).toLocaleDateString() === todayLocal);
             setAttendance(todayRecord || null);
 
         } catch (error) {
@@ -65,6 +63,7 @@ const Attendance = () => {
         if (status === 'Present') return 'text-green-600 bg-green-100 dark:bg-green-900/30 dark:text-green-400';
         if (status === 'Absent') return 'text-red-600 bg-red-100 dark:bg-red-900/30 dark:text-red-400';
         if (status === 'Half-day') return 'text-orange-600 bg-orange-100 dark:bg-orange-900/30 dark:text-orange-400';
+        if (status === 'Late') return 'text-amber-600 bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400';
         return 'text-gray-600 bg-gray-100 dark:bg-gray-700 dark:text-gray-400';
     };
 
