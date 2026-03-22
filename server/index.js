@@ -11,6 +11,14 @@ app.get('/', (req, res) => {
     res.send('Dayflow HRMS API is running');
 });
 
+app.get('/api/health', (req, res) => {
+    res.status(200).json({
+        status: 'ok',
+        uptime: process.uptime(),
+        timestamp: new Date()
+    });
+});
+
 const authRoutes = require('./routes/auth');
 const employeeRoutes = require('./routes/employee');
 const attendanceRoutes = require('./routes/attendance');
